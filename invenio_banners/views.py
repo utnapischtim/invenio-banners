@@ -7,12 +7,27 @@
 
 """Views."""
 
-from flask import Blueprint
+from flask import Blueprint, jsonify, request
 
-blueprint = Blueprint("invenio_banners", __name__)
+from invenio_banners.models import Banner
+
+blueprint = Blueprint("invenio_banners", __name__, template_folder="templates")
+
+api_blueprint = Blueprint("invenio_banners_api", __name__)
 
 
-@blueprint.route("/banners")
-def banners():
-    """Return the list of banners."""
-    pass
+@api_blueprint.route("/banners/active")
+def get_active_banner():
+    """Return the active banner."""
+    url_path = request.args.get("url_path", None)
+    banner = Banner.get_active(url_path)
+
+    result = {}
+    if banner:
+        result["message"] = banner.message
+        result["category"] = banner.category
+        result["start_datetime"] = banner.start_datetime.isoformat()
+        end = banner.end_datetime.isoformat() if banner.end_datetime else None
+        result["end_datetime"] = end
+
+    return jsonify(result)

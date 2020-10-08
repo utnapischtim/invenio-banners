@@ -24,7 +24,7 @@ for reqs in extras_require.values():
 
 setup_requires = ["Babel>=2.8"]
 
-install_requires = ["invenio-i18n>=1.2.0"]
+install_requires = ["invenio-i18n>=1.2.0", "invenio-admin>=1.2.1"]
 
 packages = find_packages()
 
@@ -50,12 +50,23 @@ setup(
     include_package_data=True,
     platforms="any",
     entry_points={
+        "invenio_admin.views": [
+            "invenio_banners = invenio_banners.admin:banners_adminview"
+        ],
         "invenio_base.apps": [
+            "invenio_banners = invenio_banners:InvenioBanners"
+        ],
+        "invenio_base.api_apps": [
             "invenio_banners = invenio_banners:InvenioBanners"
         ],
         "invenio_base.blueprints": [
             "invenio_banners = invenio_banners.views:blueprint"
         ],
+        "invenio_base.api_blueprints": [
+            "invenio_banners = invenio_banners.views:api_blueprint"
+        ],
+        "invenio_db.alembic": ["invenio_banners = invenio_banners:alembic"],
+        "invenio_db.models": ["invenio_banners = invenio_banners.models"],
         "invenio_i18n.translations": ["messages = invenio_banners"],
     },
     extras_require=extras_require,

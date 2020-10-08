@@ -22,7 +22,7 @@ def test_version():
 def test_init():
     """Test extension initialization."""
     app = Flask("testapp")
-    ext = InvenioBanners(app)
+    InvenioBanners(app)
     assert "invenio-banners" in app.extensions
 
     app = Flask("testapp")

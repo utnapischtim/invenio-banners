@@ -8,6 +8,7 @@
 """Invenio extension app."""
 
 from . import config
+from .utils import get_active_banner_for_request
 
 
 class InvenioBanners(object):
@@ -22,14 +23,15 @@ class InvenioBanners(object):
         """Flask application initialization."""
         self.init_config(app)
         app.extensions["invenio-banners"] = self
+        app.jinja_env.globals[
+            "get_active_banner"
+        ] = get_active_banner_for_request
+        app.jinja_env.filters["style_banner_category"] = app.config[
+            "BANNERS_CATEGORIES_TO_STYLE"
+        ]
 
     def init_config(self, app):
         """Initialize configuration."""
-        # Use theme's base template if theme is installed
-        if "BASE_TEMPLATE" in app.config:
-            app.config.setdefault(
-                "BANNERS_BASE_TEMPLATE", app.config["BASE_TEMPLATE"]
-            )
         for k in dir(config):
             if k.startswith("BANNERS_"):
                 app.config.setdefault(k, getattr(config, k))
