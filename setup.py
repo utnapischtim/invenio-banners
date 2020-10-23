@@ -67,7 +67,6 @@ setup(
         ],
         "invenio_db.alembic": ["invenio_banners = invenio_banners:alembic"],
         "invenio_db.models": ["invenio_banners = invenio_banners.models"],
-        "invenio_i18n.translations": ["messages = invenio_banners"],
     },
     extras_require=extras_require,
     install_requires=install_requires,
