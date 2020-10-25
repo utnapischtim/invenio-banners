@@ -6,3 +6,8 @@
 
 Changes
 =======
+
+Version 1.0.0a1 (release 2020-10-25)
+------------------------------------
+
+- Initial public release.
