@@ -56,45 +56,46 @@ class BannerModel(db.Model, Timestamp):
             )
             db.session.add(obj)
 
+        db.session.commit()
         return obj
 
     @classmethod
-    def get_active(cls, url_path=None):
-        """Return the active banner, optionally for the given /path or None."""
-        url_path = url_path or ""
-        now = datetime.utcnow()
-
-        query = (
-            cls.query.filter(cls.active.is_(True))
-            .filter(cls.start_datetime <= now)
-            .filter((cls.end_datetime.is_(None)) | (now <= cls.end_datetime))
-        )
-
-        for banner in query.all():
-            if banner.url_path is None or url_path.startswith(banner.url_path):
-                return banner
-
-        return None
-
-    @classmethod
-    def disable_expired(cls):
-        """Disable any old still active messages to keep everything clean."""
-        now = datetime.utcnow()
-
-        query = (
-            cls.query.filter(cls.active.is_(True))
-            .filter(cls.end_datetime.isnot(None))
-            .filter(cls.end_datetime < now)
-        )
-
-        for old in query.all():
-            old.active = False
+    def update(cls, data, id):
+        """Update an existing banner."""
+        with db.session.begin_nested():
+            cls.query.filter_by(id=id).update(data)
 
         db.session.commit()
 
     @classmethod
-    def search(cls):
-        """Ret banner."""
-        # TODO: not implemented/tested yet
-        banners = cls.query.all()
-        return banners
+    def get(cls, id):
+        """Get banner by its id."""
+        return cls.query.filter_by(id=id).one_or_none()
+
+    @classmethod
+    def delete(cls, banner):
+        """Delete banner by its id."""
+        with db.session.begin_nested():
+            db.session.delete(banner)
+
+        db.session.commit()
+
+    @classmethod
+    def get_active(cls, active=True, url_path=None):
+        """Return active banners, optionally for the given /path or None."""
+        url_path = url_path or ""
+        now = datetime.utcnow()
+
+        query = (
+            cls.query.filter(cls.active.is_(active))
+            .filter(cls.start_datetime <= now)
+            .filter((cls.end_datetime.is_(None)) | (now <= cls.end_datetime))
+        )
+
+        active_banners = []
+
+        for banner in query.all():
+            if banner.url_path is None or url_path.startswith(banner.url_path):
+                active_banners.append(banner)
+
+        return active_banners

@@ -8,10 +8,6 @@
 """Records directory."""
 
 
-from .api import Banner
 from .models import BannerModel
 
-__all__ = (
-    "Banner",
-    "BannerModel",
-)
+__all__ = ("BannerModel",)

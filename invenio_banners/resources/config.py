@@ -7,9 +7,12 @@
 
 """Banner Resource Configuration."""
 
+import marshmallow as ma
 from flask_resources import JSONDeserializer, RequestBodyParser
-from invenio_records_resources.resources import RecordResourceConfig, \
-    SearchRequestArgsSchema
+from invenio_records_resources.resources import (
+    RecordResourceConfig,
+    SearchRequestArgsSchema,
+)
 
 
 class BannerResourceConfig(RecordResourceConfig):
@@ -18,7 +21,21 @@ class BannerResourceConfig(RecordResourceConfig):
     # Blueprint configuration
     blueprint_name = "banners"
     url_prefix = "/banners"
-    routes = {"create": "/new"}
+    routes = {
+        "create": "/new",
+        "banner": "/<banner_id>",
+        "list": "/",
+        "active": "",
+    }
+
+    request_view_args = {
+        "banner_id": ma.fields.String(),
+    }
+
+    request_extra_args = {
+        "active": ma.fields.Boolean(),
+        "url_path": ma.fields.String(),
+    }
 
     request_search_args = SearchRequestArgsSchema
 

@@ -8,6 +8,7 @@
 """Banners Service configuration."""
 
 from invenio_records_resources.services import Link, RecordServiceConfig
+from invenio_records_resources.services.records.links import pagination_links
 
 from ..records.models import BannerModel
 from .permissions import BannersPermissionPolicy
@@ -36,4 +37,5 @@ class BannerServiceConfig(RecordServiceConfig):
     links_item = {
         "self": BannersLink("{+api}/banners/{id}"),
     }
+    links_search = pagination_links("{+api}/banners{?args*}")
     record_cls = BannerModel

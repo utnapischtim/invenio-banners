@@ -6,8 +6,7 @@
 # under the terms of the MIT License; see LICENSE file for more details.
 
 """Service results."""
-from invenio_records_resources.services.records.results import RecordItem, \
-    RecordList
+from invenio_records_resources.services.records.results import RecordItem, RecordList
 
 
 class BannerItem(RecordItem):
@@ -23,24 +22,7 @@ class BannerItem(RecordItem):
         schema=None,
     ):
         """Constructor."""
-        self._banner = banner
-        self._identity = identity
-        self._service = service
-        self._data = None
-        self._schema = schema or service.schema
-        self._links_tpl = links_tpl
-        self._errors = errors
-        super().__init__(service, identity, banner)
-
-    @property
-    def _obj(self):
-        """Return the object to dump."""
-        return self._banner
-
-    @property
-    def links(self):
-        """Get links for this result item."""
-        return self._links_tpl.expand(self._identity, self._banner)
+        super().__init__(service, identity, banner, errors, links_tpl, schema)
 
     @property
     def data(self):
@@ -52,7 +34,7 @@ class BannerItem(RecordItem):
             self._obj,
             context={
                 "identity": self._identity,
-                "record": self._banner,
+                "record": self._record,
             },
         )
 
@@ -65,8 +47,6 @@ class BannerItem(RecordItem):
 class BannerList(RecordList):
     """List of banner results."""
 
-    # TODO: not implemented/tested yet
-
     def __init__(
         self,
         service,
@@ -75,23 +55,34 @@ class BannerList(RecordList):
         params=None,
         links_tpl=None,
         links_item_tpl=None,
+        schema=None,
     ):
-        """Constructor.
-
-        :params service: a service instance
-        :params identity: an identity that performed the service request
-        :params banners: the search results
-        :params params: dictionary of the query parameters
-        """
-        self._identity = identity
-        self._results = banners
-        self._service = service
-        self._params = params
-        self._links_tpl = links_tpl
-        self._links_item_tpl = links_item_tpl
-        super().__init__(service, identity, banners)
+        """Constructor."""
+        super().__init__(
+            service, identity, banners, params, links_tpl, links_item_tpl, schema
+        )
 
     @property
-    def results(self):
-        """Get links for this result item."""
-        return self._results
+    def hits(self):
+        """Iterator over the hits."""
+        for record in self._results:
+            # Project the record
+            projection = self._schema.dump(
+                record,
+                context=dict(
+                    identity=self._identity,
+                    record=record,
+                ),
+            )
+
+            if self._links_item_tpl:
+                projection["links"] = self._links_item_tpl.expand(
+                    self._identity, record
+                )
+
+            yield projection
+
+    @property
+    def total(self):
+        """Get total number of banners."""
+        return len(self._results)
