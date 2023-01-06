@@ -8,7 +8,8 @@
 """Invenio extension app."""
 
 from . import config
-from .utils import get_active_banner_for_request
+from .resources import BannerResource, BannerResourceConfig
+from .services import BannerService, BannerServiceConfig
 
 
 class InvenioBanners(object):
@@ -22,16 +23,23 @@ class InvenioBanners(object):
     def init_app(self, app):
         """Flask application initialization."""
         self.init_config(app)
+        self.init_services(app)
+        self.init_resources(app)
         app.extensions["invenio-banners"] = self
-        app.jinja_env.globals[
-            "get_active_banner"
-        ] = get_active_banner_for_request
-        app.jinja_env.filters["style_banner_category"] = app.config[
-            "BANNERS_CATEGORIES_TO_STYLE"
-        ]
 
     def init_config(self, app):
         """Initialize configuration."""
         for k in dir(config):
             if k.startswith("BANNERS_"):
                 app.config.setdefault(k, getattr(config, k))
+
+    def init_services(self, app):
+        """Initialize the services for banners."""
+        self.banners_service = BannerService(config=BannerServiceConfig)
+
+    def init_resources(self, app):
+        """Initialize the resources for banners."""
+        self.banners_resource = BannerResource(
+            service=self.banners_service,
+            config=BannerResourceConfig,
+        )

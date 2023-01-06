@@ -14,7 +14,7 @@ from invenio_db import db
 from sqlalchemy_utils.models import Timestamp
 
 
-class Banner(db.Model, Timestamp):
+class BannerModel(db.Model, Timestamp):
     """Defines a message to show to users."""
 
     __tablename__ = "banners"
@@ -31,9 +31,7 @@ class Banner(db.Model, Timestamp):
     category = db.Column(db.String(20), nullable=False)
     """Category of the message, for styling messages per category."""
 
-    start_datetime = db.Column(
-        db.DateTime, nullable=False, default=datetime.utcnow
-    )
+    start_datetime = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     """Start date and time (UTC), can be immediate or delayed."""
 
     end_datetime = db.Column(db.DateTime, nullable=True)
@@ -43,28 +41,21 @@ class Banner(db.Model, Timestamp):
     """Defines if the message is active, only one at the same time."""
 
     @classmethod
-    def create(
-        cls,
-        message,
-        category,
-        url_path=None,
-        start_datetime=None,
-        end_datetime=None,
-        active=False,
-    ):
+    def create(cls, data):
         """Create a new banner."""
         _categories = [t[0] for t in current_app.config["BANNERS_CATEGORIES"]]
-        assert category in _categories
+        assert data.get("category") in _categories
         with db.session.begin_nested():
             obj = cls(
-                message=message,
-                category=category,
-                url_path=url_path,
-                start_datetime=start_datetime,
-                end_datetime=end_datetime,
-                active=active,
+                message=data.get("message"),
+                category=data.get("category"),
+                url_path=data.get("url_path"),
+                start_datetime=data.get("start_datetime"),
+                end_datetime=data.get("end_datetime"),
+                active=data.get("active"),
             )
             db.session.add(obj)
+
         return obj
 
     @classmethod
@@ -100,3 +91,10 @@ class Banner(db.Model, Timestamp):
             old.active = False
 
         db.session.commit()
+
+    @classmethod
+    def search(cls):
+        """Ret banner."""
+        # TODO: not implemented/tested yet
+        banners = cls.query.all()
+        return banners

@@ -11,12 +11,13 @@ from flask import current_app
 from flask_admin.contrib.sqla import ModelView
 from invenio_admin.forms import LazyChoices
 
-from .models import Banner
+from invenio_banners.records.models import BannerModel
 
 
 class BannersModelView(ModelView):
     """Banners admin view."""
 
+    # TODO: to be deleted?
     can_create = True
     can_edit = True
     can_delete = True
@@ -36,36 +37,32 @@ class BannersModelView(ModelView):
     )
 
     form_choices = {
-        "category": LazyChoices(
-            lambda: current_app.config["BANNERS_CATEGORIES"]
-        )
+        "category": LazyChoices(lambda: current_app.config["BANNERS_CATEGORIES"])
     }
 
     column_descriptions = {
         "category": "Banner category.",
         "url_path": "Enter the URL path (including the first /) to define in "
-                    "which part of the site the message will be active. For "
-                    "example, if you enter `/records`, any URL starting with "
-                    "`/records` will return an active banner (/records, "
-                    "/records/1234, etc...). Empty value will make the banner "
-                    "active for any URL.",
+        "which part of the site the message will be active. For "
+        "example, if you enter `/resources`, any URL starting with "
+        "`/resources` will return an active banner (/resources, "
+        "/resources/1234, etc...). Empty value will make the banner "
+        "active for any URL.",
         "start_datetime": "Set to current or future date/time to delay the "
-                          "banner. Input date/time in UTC timezone.",
+        "banner. Input date/time in UTC timezone.",
         "end_datetime": "Date/time to make the banner inactive. Empty "
-                        "value will make the banner active until manually "
-                        "disabled via the active flag. Input date/time in UTC "
-                        "timezone.",
+        "value will make the banner active until manually "
+        "disabled via the active flag. Input date/time in UTC "
+        "timezone.",
     }
 
     def after_model_change(self, form, model, is_created):
         """Clean up old banners after an action."""
-        Banner.disable_expired()
+        BannerModel.disable_expired()
 
     def after_model_delete(self, model):
         """Clean up old banners after an action."""
-        Banner.disable_expired()
+        BannerModel.disable_expired()
 
 
-banners_adminview = dict(
-    modelview=BannersModelView, model=Banner, name="Banners"
-)
+banners_adminview = dict(modelview=BannersModelView, model=BannerModel, name="Banners")

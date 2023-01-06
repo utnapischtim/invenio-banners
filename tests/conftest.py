@@ -8,19 +8,10 @@
 """Pytest configuration."""
 
 import pytest
-from flask import Flask
-from flask_babelex import Babel
-from invenio_admin import InvenioAdmin
-from invenio_db import InvenioDB
-
-from invenio_banners import InvenioBanners
-from invenio_banners.views import api_blueprint, blueprint
-
-
-@pytest.fixture(scope="module")
-def app(base_app, database):
-    """Override the app fixture to remove ES."""
-    yield base_app
+from invenio_access.models import ActionRoles
+from invenio_accounts.models import Role
+from invenio_administration.permissions import administration_access_action
+from invenio_app.factory import create_api
 
 
 @pytest.fixture(scope="module")
@@ -32,21 +23,64 @@ def celery_config():
 @pytest.fixture(scope="module")
 def create_app(instance_path):
     """Application factory fixture."""
+    return create_api
 
-    def factory(**config):
-        app = Flask("testapp", instance_path=instance_path)
-        app.config.update(**config)
-        Babel(app)
-        InvenioDB(app)
 
-        no_permissions = dict(
-            permission_factory=None, view_class_factory=lambda x: x
-        )
-        InvenioAdmin(app, **no_permissions)
+# Resource layer fixtures
+@pytest.fixture()
+def headers():
+    """Default headers for making requests."""
+    return {
+        "content-type": "application/json",
+        "accept": "application/json",
+    }
 
-        InvenioBanners(app)
-        app.register_blueprint(blueprint)
-        app.register_blueprint(api_blueprint)
-        return app
 
-    return factory
+@pytest.fixture()
+def request_banner_data():
+    """Example data for sending to the REST API."""
+    return {
+        "message": "Banner message",
+        "url_path": "/url_path",
+        "category": "warning",
+        "active": True,
+    }
+
+
+@pytest.fixture(scope="function")
+def admin_role_need(db):
+    """Store 1 role with 'superuser-access' ActionNeed."""
+    role = Role(name="administration-access")
+    db.session.add(role)
+
+    action_role = ActionRoles.create(action=administration_access_action, role=role)
+    db.session.add(action_role)
+
+    db.session.commit()
+    return action_role.need
+
+
+@pytest.fixture()
+def admin(UserFixture, app, db, admin_role_need):
+    """Admin user for requests."""
+    u = UserFixture(
+        email="admin@inveniosoftware.org",
+        password="admin",
+    )
+    u.create(app, db)
+
+    datastore = app.extensions["security"].datastore
+    _, role = datastore._prepare_role_modify_args(u.user, "administration-access")
+
+    datastore.add_role_to_user(u.user, role)
+    db.session.commit()
+    return u
+
+
+@pytest.fixture()
+def user(UserFixture, app, db):
+    """General user for requests."""
+    user = UserFixture(email="user1@example.org", password="user1")
+    user.create(app, db)
+
+    return user

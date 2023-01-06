@@ -14,7 +14,7 @@ from setuptools import find_packages, setup
 readme = open("README.rst").read()
 history = open("CHANGES.rst").read()
 
-tests_require = ["pytest-invenio>=1.4.0"]
+tests_require = ["pytest-invenio>=1.4.0", "invenio-app>=1.3.4"]
 
 extras_require = {"docs": ["Sphinx>=3"], "tests": tests_require}
 
@@ -24,7 +24,10 @@ for reqs in extras_require.values():
 
 setup_requires = ["Babel>=2.8"]
 
-install_requires = ["invenio-i18n>=1.2.0", "invenio-admin>=1.2.1"]
+install_requires = [
+    "invenio-records-resources>=1.0.0,<2.0.0",
+    "invenio-administration>=1.0.0,<2.0.0",
+]
 
 packages = find_packages()
 
@@ -53,20 +56,13 @@ setup(
         "invenio_admin.views": [
             "invenio_banners = invenio_banners.admin:banners_adminview"
         ],
-        "invenio_base.apps": [
-            "invenio_banners = invenio_banners:InvenioBanners"
-        ],
-        "invenio_base.api_apps": [
-            "invenio_banners = invenio_banners:InvenioBanners"
-        ],
-        "invenio_base.blueprints": [
-            "invenio_banners = invenio_banners.views:blueprint"
-        ],
+        "invenio_base.apps": ["invenio_banners = invenio_banners:InvenioBanners"],
+        "invenio_base.api_apps": ["invenio_banners = invenio_banners:InvenioBanners"],
         "invenio_base.api_blueprints": [
-            "invenio_banners = invenio_banners.views:api_blueprint"
+            "invenio_banners = invenio_banners.views:create_banners_api_bp"
         ],
         "invenio_db.alembic": ["invenio_banners = invenio_banners:alembic"],
-        "invenio_db.models": ["invenio_banners = invenio_banners.models"],
+        "invenio_db.models": ["invenio_banners = invenio_banners.records.models"],
     },
     extras_require=extras_require,
     install_requires=install_requires,

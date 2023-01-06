@@ -7,16 +7,6 @@
 
 """Utils."""
 
-from flask import request
-
-from invenio_banners.models import Banner
-
-
-def get_active_banner_for_request():
-    """Get active banner for the current URL path request."""
-    url_path = request.path
-    return Banner.get_active(url_path)
-
 
 def style_category(category):
     """Return predefined Boostrap CSS classes for each banner category."""
