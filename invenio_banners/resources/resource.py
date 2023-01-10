@@ -7,7 +7,7 @@
 
 """Invenio Banners module to create REST APIs."""
 
-from flask import abort, g
+from flask import g
 from flask_resources import Resource, resource_requestctx, response_handler, route
 from invenio_records_resources.resources.records.resource import (
     request_data,
@@ -17,11 +17,15 @@ from invenio_records_resources.resources.records.resource import (
     request_view_args,
 )
 
+from .errors import ErrorHandlersMixin
+
+from .errors import ErrorHandlersMixin
+
 
 #
 # Resource
 #
-class BannerResource(Resource):
+class BannerResource(ErrorHandlersMixin, Resource):
     """Banner resource."""
 
     def __init__(self, config, service):
@@ -37,7 +41,6 @@ class BannerResource(Resource):
             route("GET", routes["banner"], self.read),
             route("GET", routes["list"], self.search),
             route("DELETE", routes["banner"], self.delete),
-            route("GET", routes["active"], self.read_active),
             route("PUT", routes["banner"], self.update),
         ]
 
@@ -53,11 +56,6 @@ class BannerResource(Resource):
             data=resource_requestctx.data,
         )
 
-        if banner is None:
-            abort(
-                404, {"message": "Banner with id {0} is not found.".format(banner_id)}
-            )
-
         return banner.to_dict(), 200
 
     @request_view_args
@@ -70,36 +68,30 @@ class BannerResource(Resource):
             identity=g.identity,
         )
 
-        if banner is None:
-            abort(
-                404, {"message": "Banner with id {0} is not found.".format(banner_id)}
-            )
-
         return banner.to_dict(), 200
-
-    @request_view_args
-    @request_extra_args
-    @response_handler()
-    def read_active(self):
-        """Read active banners."""
-        # GET /api/banners?active=true&url_path=url_path
-        banners = self.service.read_active(
-            identity=g.identity,
-            active=resource_requestctx.args.get("active", True),
-            url_path=resource_requestctx.args.get("url_path", None),
-        )
-
-        return banners.to_dict(), 200
 
     @request_search_args
     @request_view_args
+    @request_extra_args
     @response_handler(many=True)
     def search(self):
         """Perform a search over the banners."""
-        banners = self.service.search(
-            identity=g.identity,
-            params=resource_requestctx.args,
-        )
+        active_arg = resource_requestctx.args.get("active")
+
+        if active_arg is None:
+            # Search for all the records:
+            # GET /api/banners
+            banners = self.service.search(
+                identity=g.identity,
+            )
+        else:
+            # Search for records filtered by 'active' and 'url_path' fields:
+            # GET /api/banners?active=true&url_path=url_path
+            banners = self.service.read_active(
+                identity=g.identity,
+                active=active_arg,
+                url_path=resource_requestctx.args.get("url_path", None),
+            )
 
         return banners.to_dict(), 200
 
@@ -123,10 +115,5 @@ class BannerResource(Resource):
             id=banner_id,
             identity=g.identity,
         )
-
-        if banner is None:
-            abort(
-                404, {"message": "Banner with id {0} is not found.".format(banner_id)}
-            )
 
         return banner.to_dict(), 204

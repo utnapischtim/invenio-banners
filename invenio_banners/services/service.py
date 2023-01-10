@@ -11,6 +11,7 @@ from invenio_records_resources.services import RecordService
 from invenio_records_resources.services.base import LinksTemplate
 
 from ..records.models import BannerModel
+from ..services.errors import BannerNotExistsError
 
 
 class BannerService(RecordService):
@@ -23,8 +24,9 @@ class BannerService(RecordService):
 
         banner = self.record_cls.get(id)
 
+        # check if banner exists
         if banner is None:
-            return None
+            raise BannerNotExistsError(id)
 
         return self.result_item(
             self,
@@ -86,7 +88,7 @@ class BannerService(RecordService):
         # check if banner exists
         banner = self.record_cls.get(id)
         if banner is None:
-            return None
+            raise BannerNotExistsError(id)
 
         self.record_cls.delete(banner)
 
@@ -99,7 +101,7 @@ class BannerService(RecordService):
         # check if banner exists
         banner = self.record_cls.get(id)
         if banner is None:
-            return None
+            raise BannerNotExistsError(id)
 
         self.record_cls.update(data, id)
 

@@ -7,8 +7,6 @@
 
 """Invenio extension app."""
 
-from invenio_banners.services import BannerService, BannerServiceConfig
-
 from . import config
 from .resources import BannerResource, BannerResourceConfig
 from .services import BannerService, BannerServiceConfig

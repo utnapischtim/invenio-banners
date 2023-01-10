@@ -25,7 +25,6 @@ class BannerResourceConfig(RecordResourceConfig):
         "create": "/new",
         "banner": "/<banner_id>",
         "list": "/",
-        "active": "",
     }
 
     request_view_args = {
