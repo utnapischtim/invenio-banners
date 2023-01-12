@@ -36,17 +36,6 @@ def headers():
     }
 
 
-@pytest.fixture()
-def request_banner_data():
-    """Example data for sending to the REST API."""
-    return {
-        "message": "Banner message",
-        "url_path": "/url_path",
-        "category": "warning",
-        "active": True,
-    }
-
-
 @pytest.fixture(scope="function")
 def admin_role_need(db):
     """Store 1 role with 'superuser-access' ActionNeed."""

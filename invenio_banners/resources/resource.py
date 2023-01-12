@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2022 CERN.
+# Copyright (C) 2022-2023 CERN.
 #
 # Invenio-Banners is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -8,14 +8,11 @@
 """Invenio Banners module to create REST APIs."""
 
 from flask import g
-from flask_resources import Resource, resource_requestctx, response_handler, route
-from invenio_records_resources.resources.records.resource import (
-    request_data,
-    request_extra_args,
-    request_headers,
-    request_search_args,
-    request_view_args,
-)
+from flask_resources import Resource, resource_requestctx, response_handler, \
+    route
+from invenio_records_resources.resources.records.resource import \
+    request_data, request_extra_args, request_headers, request_search_args, \
+    request_view_args
 
 from .errors import ErrorHandlersMixin
 
@@ -38,10 +35,10 @@ class BannerResource(ErrorHandlersMixin, Resource):
         routes = self.config.routes
         return [
             route("POST", routes["create"], self.create),
-            route("GET", routes["banner"], self.read),
+            route("GET", routes["item"], self.read),
             route("GET", routes["list"], self.search),
-            route("DELETE", routes["banner"], self.delete),
-            route("PUT", routes["banner"], self.update),
+            route("DELETE", routes["item"], self.delete),
+            route("PUT", routes["item"], self.update),
         ]
 
     @request_view_args
@@ -71,27 +68,13 @@ class BannerResource(ErrorHandlersMixin, Resource):
         return banner.to_dict(), 200
 
     @request_search_args
-    @request_view_args
-    @request_extra_args
     @response_handler(many=True)
     def search(self):
         """Perform a search over the banners."""
-        active_arg = resource_requestctx.args.get("active")
-
-        if active_arg is None:
-            # Search for all the records:
-            # GET /api/banners
-            banners = self.service.search(
-                identity=g.identity,
-            )
-        else:
-            # Search for records filtered by 'active' and 'url_path' fields:
-            # GET /api/banners?active=true&url_path=url_path
-            banners = self.service.read_active(
-                identity=g.identity,
-                active=active_arg,
-                url_path=resource_requestctx.args.get("url_path", None),
-            )
+        banners = self.service.search(
+            identity=g.identity,
+            params=resource_requestctx.args,
+        )
 
         return banners.to_dict(), 200
 

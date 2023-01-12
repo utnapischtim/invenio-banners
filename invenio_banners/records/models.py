@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2020 CERN.
+# Copyright (C) 2020-2023 CERN.
 #
 # Invenio-Banners is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -11,7 +11,10 @@ from datetime import datetime
 
 from flask import current_app
 from invenio_db import db
+from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy_utils.models import Timestamp
+
+from ..services.errors import BannerNotExistsError
 
 
 class BannerModel(db.Model, Timestamp):
@@ -70,7 +73,10 @@ class BannerModel(db.Model, Timestamp):
     @classmethod
     def get(cls, id):
         """Get banner by its id."""
-        return cls.query.filter_by(id=id).one_or_none()
+        try:
+            return cls.query.filter_by(id=id).one()
+        except NoResultFound:
+            raise BannerNotExistsError(id)
 
     @classmethod
     def delete(cls, banner):
@@ -81,13 +87,12 @@ class BannerModel(db.Model, Timestamp):
         db.session.commit()
 
     @classmethod
-    def get_active(cls, active=True, url_path=None):
-        """Return active banners, optionally for the given /path or None."""
-        url_path = url_path or ""
+    def get_active(cls, url_path):
+        """Return active banners for the given /path."""
         now = datetime.utcnow()
 
         query = (
-            cls.query.filter(cls.active.is_(active))
+            cls.query.filter(cls.active.is_(True))
             .filter(cls.start_datetime <= now)
             .filter((cls.end_datetime.is_(None)) | (now <= cls.end_datetime))
         )
@@ -99,3 +104,31 @@ class BannerModel(db.Model, Timestamp):
                 active_banners.append(banner)
 
         return active_banners
+
+    @classmethod
+    def search(cls, limit, params=None):
+        """Filter banners accordingly to query params."""
+        query = BannerModel.query
+
+        if params:
+            for attr, value in params["facets"].items():
+                query = query.filter(getattr(BannerModel, attr) == value[0])
+
+        banners = query.limit(limit).all()
+        return banners
+
+    @classmethod
+    def disable_expired(cls):
+        """Disable any old still active messages to keep everything clean."""
+        now = datetime.utcnow()
+
+        query = (
+            cls.query.filter(cls.active.is_(True))
+            .filter(cls.end_datetime.isnot(None))
+            .filter(cls.end_datetime < now)
+        )
+
+        for old in query.all():
+            old.active = False
+
+        db.session.commit()

@@ -20,3 +20,4 @@ class BannersPermissionPolicy(BasePermissionPolicy):
     can_search = [AnyUser(), SystemProcess()]
     can_update = [Administration(), SystemProcess()]
     can_delete = [Administration(), SystemProcess()]
+    can_disable = [Administration(), SystemProcess()]

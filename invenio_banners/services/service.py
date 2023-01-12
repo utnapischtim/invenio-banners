@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2022 CERN.
+# Copyright (C) 2022-2023 CERN.
 #
 # Invenio-Banners is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -10,23 +10,15 @@
 from invenio_records_resources.services import RecordService
 from invenio_records_resources.services.base import LinksTemplate
 
-from ..records.models import BannerModel
-from ..services.errors import BannerNotExistsError
-
 
 class BannerService(RecordService):
     """Banner Service."""
 
     def read(self, identity, id):
         """Retrieve a banner."""
-        # resolve and require permission
         self.require_permission(identity, "read")
 
         banner = self.record_cls.get(id)
-
-        # check if banner exists
-        if banner is None:
-            raise BannerNotExistsError(id)
 
         return self.result_item(
             self,
@@ -35,26 +27,25 @@ class BannerService(RecordService):
             links_tpl=self.links_item_tpl,
         )
 
-    def read_active(self, identity, active, url_path, params=None):
-        """Retrieve a banner."""
-        # resolve and require permission
+    def read_active_banners(self, identity, url_path):
+        """Retrieve the list of active banners with the given url_path."""
         self.require_permission(identity, "read")
 
-        banners = self.record_cls.get_active(active, url_path)
+        banners = self.record_cls.get_active(url_path)
 
         return self.result_list(
             self,
             identity,
             banners,
-            links_tpl=LinksTemplate(self.config.links_search, context={"args": params}),
             links_item_tpl=self.links_item_tpl,
         )
 
-    def search(self, identity, params=None):
+    def search(self, identity, limit=100, params=None):
         """Search for banners matching the querystring."""
         self.require_permission(identity, "search")
 
-        banners = BannerModel.query.all()
+        banners = self.record_cls.search(limit, params)
+
         return self.result_list(
             self,
             identity,
@@ -85,10 +76,7 @@ class BannerService(RecordService):
         """Delete a banner from database."""
         self.require_permission(identity, "delete")
 
-        # check if banner exists
         banner = self.record_cls.get(id)
-        if banner is None:
-            raise BannerNotExistsError(id)
 
         self.record_cls.delete(banner)
 
@@ -98,10 +86,7 @@ class BannerService(RecordService):
         """Update a banner."""
         self.require_permission(identity, "update")
 
-        # check if banner exists
         banner = self.record_cls.get(id)
-        if banner is None:
-            raise BannerNotExistsError(id)
 
         self.record_cls.update(data, id)
 
@@ -111,3 +96,8 @@ class BannerService(RecordService):
             banner,
             links_tpl=self.links_item_tpl,
         )
+
+    def disable_expired(self, identity):
+        """Disable expired banners."""
+        self.require_permission(identity, "disable")
+        self.record_cls.disable_expired()

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2022 CERN.
+# Copyright (C) 2022-2023 CERN.
 #
 # Invenio-Banners is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -9,10 +9,8 @@
 
 import marshmallow as ma
 from flask_resources import JSONDeserializer, RequestBodyParser
-from invenio_records_resources.resources import (
-    RecordResourceConfig,
-    SearchRequestArgsSchema,
-)
+from invenio_records_resources.resources import RecordResourceConfig, \
+    SearchRequestArgsSchema
 
 
 class BannerResourceConfig(RecordResourceConfig):
@@ -23,7 +21,7 @@ class BannerResourceConfig(RecordResourceConfig):
     url_prefix = "/banners"
     routes = {
         "create": "/new",
-        "banner": "/<banner_id>",
+        "item": "/<banner_id>",
         "list": "/",
     }
 

@@ -6,7 +6,8 @@
 # under the terms of the MIT License; see LICENSE file for more details.
 
 """Service results."""
-from invenio_records_resources.services.records.results import RecordItem, RecordList
+from invenio_records_resources.services.records.results import RecordItem, \
+    RecordList
 
 
 class BannerItem(RecordItem):
