@@ -13,6 +13,7 @@
 
 include .dockerignore
 include .editorconfig
+include .git-blame-ignore-revs
 include .tx/config
 include *.rst
 include *.sh
