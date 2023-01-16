@@ -27,7 +27,7 @@ def app_config(app_config):
     return app_config
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def headers():
     """Default headers for making requests."""
     return {

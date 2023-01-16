@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2020 CERN.
+# Copyright (C) 2020-2023 CERN.
 #
 # Invenio-Banners is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -26,7 +26,6 @@ def create_app(instance_path):
     return create_api
 
 
-# Resource layer fixtures
 @pytest.fixture()
 def headers():
     """Default headers for making requests."""
@@ -36,7 +35,7 @@ def headers():
     }
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def admin_role_need(db):
     """Store 1 role with 'superuser-access' ActionNeed."""
     role = Role(name="administration-access")

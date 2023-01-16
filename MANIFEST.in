@@ -19,7 +19,6 @@ include *.sh
 include *.txt
 include LICENSE
 include babel.ini
-include pytest.ini
 prune docs/_build
 recursive-include .github/workflows *.yml
 recursive-include docs *.bat
