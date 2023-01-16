@@ -8,6 +8,7 @@
 """Create and show banners with useful messages to users."""
 
 from .ext import InvenioBanners
+
 __version__ = "1.0.0a1"
 
 __all__ = ("__version__", "InvenioBanners")

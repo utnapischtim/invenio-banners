@@ -8,13 +8,13 @@
 """Invenio Banners module to create REST APIs."""
 
 from flask import g
-from flask_resources import Resource, resource_requestctx, response_handler, \
-    route
-from invenio_records_resources.resources.records.resource import \
-    request_data, request_extra_args, request_headers, request_search_args, \
-    request_view_args
-
-from .errors import ErrorHandlersMixin
+from flask_resources import Resource, resource_requestctx, response_handler, route
+from invenio_records_resources.resources.records.resource import (
+    request_data,
+    request_headers,
+    request_search_args,
+    request_view_args,
+)
 
 from .errors import ErrorHandlersMixin
 

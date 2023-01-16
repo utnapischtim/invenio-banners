@@ -9,8 +9,10 @@
 
 import marshmallow as ma
 from flask_resources import JSONDeserializer, RequestBodyParser
-from invenio_records_resources.resources import RecordResourceConfig, \
-    SearchRequestArgsSchema
+from invenio_records_resources.resources import (
+    RecordResourceConfig,
+    SearchRequestArgsSchema,
+)
 
 
 class BannerResourceConfig(RecordResourceConfig):
