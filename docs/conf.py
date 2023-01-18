@@ -48,7 +48,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "Invenio-Banners"
-copyright = "2020-2023, CERN"
+copyright = "2020, CERN"
 author = "CERN"
 
 # The version info for the project you're documenting, acts as replacement for
@@ -244,8 +244,8 @@ latex_documents = [
     (
         master_doc,
         "invenio-banners.tex",
-        u"invenio-banners Documentation",
-        u"CERN",
+        "invenio-banners Documentation",
+        "CERN",
         "manual",
     )
 ]
@@ -279,7 +279,7 @@ man_pages = [
     (
         master_doc,
         "invenio-banners",
-        u"invenio-banners Documentation",
+        "invenio-banners Documentation",
         [author],
         1,
     )
@@ -298,7 +298,7 @@ texinfo_documents = [
     (
         master_doc,
         "invenio-banners",
-        u"Invenio-Banners Documentation",
+        "Invenio-Banners Documentation",
         author,
         "invenio-banners",
         "Create and show banners with useful messages to users.",
