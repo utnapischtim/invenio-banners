@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2020 CERN.
+# Copyright (C) 2020-2023 CERN.
 #
 # Invenio-Banners is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -9,12 +9,12 @@
 
 
 def style_category(category):
-    """Return predefined Boostrap CSS classes for each banner category."""
-    css_class = "alert alert-{}"
+    """Return predefined Semantic-UI classes for each banner category."""
+    style_class = "ui {} flashed top attached manage mb-0 message"
     if category == "warning":
-        css_class = css_class.format("warning")
+        style_class = style_class.format("warning")
     elif category == "other":
-        css_class = css_class.format("secondary")
+        style_class = style_class.format("grey")
     else:
-        css_class = css_class.format("primary")
-    return css_class
+        style_class = style_class.format("info")
+    return style_class
