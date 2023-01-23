@@ -34,7 +34,7 @@ class BannerResource(ErrorHandlersMixin, Resource):
         """Create the URL rules for the record resource."""
         routes = self.config.routes
         return [
-            route("POST", routes["create"], self.create),
+            route("POST", routes["list"], self.create),
             route("GET", routes["item"], self.read),
             route("GET", routes["list"], self.search),
             route("DELETE", routes["item"], self.delete),

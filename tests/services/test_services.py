@@ -34,6 +34,7 @@ banners = {
         "message": "other",
         "url_path": "/other",
         "category": "warning",
+        "end_datetime": datetime.utcnow() + timedelta(days=5),
         "active": True,
     },
     "expired": {
@@ -41,6 +42,20 @@ banners = {
         "url_path": "/expired",
         "category": "info",
         "end_datetime": datetime.utcnow() - timedelta(days=1),
+        "active": True,
+    },
+    "sub_records_only": {
+        "message": "sub_records_only",
+        "url_path": "/resources/sub",
+        "category": "warning",
+        "start_datetime": datetime.utcnow() - timedelta(days=1),
+        "active": True,
+    },
+    "records_only": {
+        "message": "records_only",
+        "url_path": "/resources",
+        "category": "info",
+        "start_datetime": datetime.utcnow() - timedelta(days=1),
         "active": True,
     },
 }
@@ -151,49 +166,33 @@ def test_read_non_existing_banner(app, simple_user_identity):
     assert ex.value.description == "Banner with id 1 is not found."
 
 
-def test_search_banner_with_limit(app, simple_user_identity):
-    """Search for banners limited (return 2 out of 3)."""
-    # create banners first
-    BannerModel.create(banners["active"])
-    BannerModel.create(banners["other"])
-    BannerModel.create(banners["inactive"])
-
-    banner_list = service.search(simple_user_identity, limit=2)
-
-    assert banner_list.total == 2
-    result_hits = banner_list.to_dict()["hits"]
-    result_list = result_hits["hits"]
-    assert len(result_list) == 2
-    assert result_list[0]["message"] == "active"
-    assert result_list[1]["message"] == "other"
-
-
 def test_search_banner_with_params(app, simple_user_identity):
     """Search for banners with parameters."""
     # create banners first
     BannerModel.create(banners["active"])
     BannerModel.create(banners["other"])
     BannerModel.create(banners["inactive"])
+    BannerModel.create(banners["expired"])
 
     search_params = {
-        "facets": {
-            "active": [True],
-            "category": ["info"],
-        }
+        "q": "true",
+        "sort": "end_datetime",
+        "size": 2,
+        "sort_direction": "desc",
     }
 
     banner_list = service.search(simple_user_identity, params=search_params)
 
-    assert banner_list.total == 1
-    result_hits = banner_list.to_dict()["hits"]
-    result_list = result_hits["hits"]
-    assert len(result_list) == 1
-    assert result_list[0]["message"] == "active"
+    assert banner_list.total == 3
+    result_list = banner_list.to_dict()["hits"]["hits"]
+    assert len(result_list) == 2
+    assert result_list[0]["message"] == "other"
+    assert result_list[1]["message"] == "active"
 
 
 def test_search_banner_empty_list(app, simple_user_identity):
     """Search for banners (no banner found)."""
-    banner_list = service.search(simple_user_identity)
+    banner_list = service.search(simple_user_identity, {})
 
     assert banner_list.total == 0
     result_list = banner_list.to_dict()["hits"]
@@ -228,6 +227,63 @@ def test_read_active_banners_empty_list(app, simple_user_identity):
     assert banner_list.total == 0
     result_list = banner_list.to_dict()["hits"]
     assert len(result_list["hits"]) == 0
+
+
+def test_read_active_with_sub_path(app, simple_user_identity):
+    """Test read active with sub path."""
+    # create banners first
+    BannerModel.create(banners["sub_records_only"])
+
+    assert (
+        service.read_active_banners(simple_user_identity, "/resources/sub").to_dict()[
+            "hits"
+        ]["hits"][0]["message"]
+        == "sub_records_only"
+    )
+    assert (
+        service.read_active_banners(simple_user_identity, "/resources").to_dict()[
+            "hits"
+        ]["hits"]
+        == []
+    )
+    assert (
+        service.read_active_banners(simple_user_identity, "/").to_dict()["hits"]["hits"]
+        == []
+    )
+    assert (
+        service.read_active_banners(simple_user_identity, "/other").to_dict()["hits"][
+            "hits"
+        ]
+        == []
+    )
+
+
+def test_read_active_with_specific_path(app, simple_user_identity):
+    """Test read active with specific path."""
+    BannerModel.create(banners["records_only"])
+
+    assert (
+        service.read_active_banners(simple_user_identity, "/resources").to_dict()[
+            "hits"
+        ]["hits"][0]["message"]
+        == "records_only"
+    )
+    assert (
+        service.read_active_banners(simple_user_identity, "/resources/other").to_dict()[
+            "hits"
+        ]["hits"][0]["message"]
+        == "records_only"
+    )
+    assert (
+        service.read_active_banners(simple_user_identity, "/").to_dict()["hits"]["hits"]
+        == []
+    )
+    assert (
+        service.read_active_banners(simple_user_identity, "/other").to_dict()["hits"][
+            "hits"
+        ]
+        == []
+    )
 
 
 def test_disable_expired_banners(app, superuser_identity):

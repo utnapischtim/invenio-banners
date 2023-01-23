@@ -11,7 +11,9 @@ from datetime import datetime
 
 from flask import current_app
 from invenio_db import db
+from sqlalchemy import or_
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.sql import text
 from sqlalchemy_utils.models import Timestamp
 
 from ..services.errors import BannerNotExistsError
@@ -87,8 +89,8 @@ class BannerModel(db.Model, Timestamp):
         db.session.commit()
 
     @classmethod
-    def get_active(cls, url_path):
-        """Return active banners for the given /path."""
+    def get_active(cls):
+        """Return active banners."""
         now = datetime.utcnow()
 
         query = (
@@ -97,24 +99,23 @@ class BannerModel(db.Model, Timestamp):
             .filter((cls.end_datetime.is_(None)) | (now <= cls.end_datetime))
         )
 
-        active_banners = []
-
-        for banner in query.all():
-            if banner.url_path is None or url_path.startswith(banner.url_path):
-                active_banners.append(banner)
-
-        return active_banners
+        return query.all()
 
     @classmethod
-    def search(cls, limit, params=None):
+    def search(cls, search_params, filters):
         """Filter banners accordingly to query params."""
-        query = BannerModel.query
+        banners = (
+            BannerModel.query.filter(or_(*filters))
+            .order_by(
+                search_params["sort_direction"](text(",".join(search_params["sort"])))
+            )
+            .paginate(
+                page=search_params["page"],
+                per_page=search_params["size"],
+                error_out=False,
+            )
+        )
 
-        if params:
-            for attr, value in params["facets"].items():
-                query = query.filter(getattr(BannerModel, attr) == value[0])
-
-        banners = query.limit(limit).all()
         return banners
 
     @classmethod

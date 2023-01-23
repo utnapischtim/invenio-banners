@@ -36,13 +36,6 @@ banners = {
         "end_datetime": datetime.utcnow() - timedelta(days=1),
         "active": True,
     },
-    "records_only": {
-        "message": "records_only",
-        "url_path": "/resources",
-        "category": "info",
-        "start_datetime": datetime.utcnow() - timedelta(days=1),
-        "active": True,
-    },
     "sub_records_only": {
         "message": "sub_records_only",
         "url_path": "/resources/sub",
@@ -65,6 +58,34 @@ banners = {
         "active": True,
     },
 }
+
+
+def test_get_active_with_datetime(app):
+    """Test get active with end_datetime in past."""
+    BannerModel.create(banners["with_end_datetime"])
+    assert BannerModel.get_active() == []
+
+
+def test_get_active_future_datetime(app, db):
+    """Test get active with future date."""
+    BannerModel.create(banners["expired"])
+    assert BannerModel.get_active() == []
+
+
+def test_get_active_disabled(app, db):
+    """Test get non-active."""
+    BannerModel.create(banners["disabled"])
+    assert BannerModel.get_active() == []
+
+
+def test_get_active(app):
+    """Test get active banner."""
+    # create banners first
+    BannerModel.create(banners["sub_records_only"])
+    BannerModel.create(banners["disabled"])
+
+    assert len(BannerModel.get_active()) == 1
+    assert BannerModel.get_active()[0].message == "sub_records_only"
 
 
 def test_create_banner(app):
@@ -131,67 +152,10 @@ def test_get_non_existing_banner(app):
 
 def test_category(app):
     """Test create banner with incorrect category."""
-    BannerModel.create(banners["valid"])
-    assert BannerModel.get_active("/valid")[0].category == "info"
+    banner = BannerModel.get(1)
+    assert banner.message == "with_end_datetime"
+    assert banner.category == "info"
 
     with pytest.raises(AssertionError):
-        banners["valid"]["category"] = "wrong"
-        BannerModel.create(banners["valid"])
-
-
-def test_get_with_path_datetime(app):
-    """Test get active with end_datetime in past."""
-    BannerModel.create(banners["with_end_datetime"])
-    assert BannerModel.get_active("/with_end_datetime") == []
-
-
-def test_get_with_sub_path(app):
-    """Test get active with sub path."""
-    BannerModel.create(banners["sub_records_only"])
-
-    assert BannerModel.get_active("/resources/sub")[0].message == "sub_records_only"
-    assert BannerModel.get_active("/resources") == []
-    assert BannerModel.get_active("/") == []
-    assert BannerModel.get_active("/other") == []
-
-
-def test_get_with_specific_path(app):
-    """Test get active with specific path."""
-    BannerModel.create(banners["records_only"])
-
-    assert BannerModel.get_active("/resources")[0].message == "records_only"
-    assert BannerModel.get_active("/resources/other")[0].message == "records_only"
-    assert BannerModel.get_active("/") == []
-    assert BannerModel.get_active("/other") == []
-
-
-def test_get_future_datetime(app, db):
-    """Test get active with future date."""
-    BannerModel.create(banners["expired"])
-    assert BannerModel.get_active("/expired") == []
-
-
-def test_get_disabled(app, db):
-    """Test get non-active."""
-    BannerModel.create(banners["disabled"])
-    assert BannerModel.get_active("/disabled") == []
-
-
-def test_search_banner(app):
-    """Search for banners limited with parameters."""
-    # create banners first
-    BannerModel.create(banners["disabled"])
-    BannerModel.create(banners["expired"])
-    BannerModel.create(banners["sub_records_only"])
-
-    search_params = {
-        "facets": {
-            "active": [True],
-            "category": ["warning"],
-        }
-    }
-
-    banner_list = BannerModel.search(limit=1, params=search_params)
-
-    assert len(banner_list) == 1
-    assert banner_list[0].message == "sub_records_only"
+        banners["with_end_datetime"]["category"] = "wrong"
+        BannerModel.create(banners["with_end_datetime"])

@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2022 CERN.
+# Copyright (C) 2022-2023 CERN.
 #
 # Invenio-Banners is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
 """Service results."""
+from flask_sqlalchemy import Pagination
 from invenio_records_resources.services.records.results import RecordItem, RecordList
 
 
@@ -65,7 +66,7 @@ class BannerList(RecordList):
     @property
     def hits(self):
         """Iterator over the hits."""
-        for record in self._results:
+        for record in self.banners_result():
             # Project the record
             projection = self._schema.dump(
                 record,
@@ -85,4 +86,16 @@ class BannerList(RecordList):
     @property
     def total(self):
         """Get total number of banners."""
-        return len(self._results)
+        return (
+            self._results.total
+            if isinstance(self._results, Pagination)
+            else len(self._results)
+        )
+
+    def banners_result(self):
+        """Get iterable banners list."""
+        return (
+            self._results.items
+            if isinstance(self._results, Pagination)
+            else self._results
+        )

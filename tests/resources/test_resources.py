@@ -6,6 +6,8 @@
 # under the terms of the MIT License; see LICENSE file for more details.
 
 """Banner resource tests."""
+from datetime import date, datetime
+
 import pytest
 from invenio_records_resources.services.errors import PermissionDeniedError
 
@@ -17,12 +19,24 @@ banners = {
         "url_path": "/banner1",
         "category": "info",
         "active": True,
+        "start_datetime": date(2022, 7, 20),
+        "end_datetime": date(2023, 1, 29),
     },
     "banner2": {
         "message": "banner2",
         "url_path": "/banner2",
-        "category": "info",
+        "category": "other",
         "active": False,
+        "start_datetime": date(2022, 12, 15),
+        "end_datetime": date(2023, 1, 5),
+    },
+    "banner3": {
+        "message": "banner3",
+        "url_path": "/banner3",
+        "category": "warning",
+        "active": True,
+        "start_datetime": date(2023, 1, 20),
+        "end_datetime": date(2023, 2, 25),
     },
 }
 
@@ -30,7 +44,7 @@ banners = {
 def _create_banner(client, data, headers, status_code=None):
     """Send POST request."""
     result = client.post(
-        "/banners/new",
+        "/banners/",
         headers=headers,
         json=data,
     )
@@ -197,7 +211,7 @@ def test_read_non_existing_banner(client, user):
 
 
 def test_search_banner(client, user):
-    """Search for banners."""
+    """Search for banners without query parameters."""
     # create banners first
     BannerModel.create(banners["banner1"])
     BannerModel.create(banners["banner2"])
@@ -219,18 +233,89 @@ def test_search_banner_with_params(client, user):
     # create banners first
     BannerModel.create(banners["banner1"])
     BannerModel.create(banners["banner2"])
+    BannerModel.create(banners["banner3"])
 
     user.login(client)
 
-    # /banners?message=banner1&category=info
-    query_string = {"message": "banner1", "category": "info"}
+    # filtering
+    # filter by string(category)
+    query_string = {"q": "warning"}
     banners_result = _search_banners(client, 200, query_string).json
 
     result_hits = banners_result["hits"]
     assert result_hits["total"] == 1
-    result_list = result_hits["hits"]
-    assert len(result_list) == 1
-    assert result_list[0]["message"] == "banner1"
+    assert result_hits["hits"][0]["message"] == "banner3"
+
+    # filter by bool(active)
+    query_string = {"q": "false"}
+    banners_result = _search_banners(client, 200, query_string).json
+
+    result_hits = banners_result["hits"]
+    assert result_hits["total"] == 1
+    assert result_hits["hits"][0]["message"] == "banner2"
+
+    # filter by datetime(start_datetime)
+    query_string = {"q": "2023-1-20"}
+    banners_result = _search_banners(client, 200, query_string).json
+
+    result_hits = banners_result["hits"]
+    assert result_hits["total"] == 1
+    assert result_hits["hits"][0]["message"] == "banner3"
+
+    # sorting
+    # default sort (by created field in asc order)
+    banners_result = _search_banners(client, 200).json
+    result_hits = banners_result["hits"]
+    assert result_hits["total"] == 3
+    assert result_hits["hits"][0]["message"] == "banner1"
+    assert result_hits["hits"][1]["message"] == "banner2"
+    assert result_hits["hits"][2]["message"] == "banner3"
+
+    # sort by string(category)
+    query_string = {"sort": "category"}
+    banners_result = _search_banners(client, 200, query_string).json
+    result_hits = banners_result["hits"]
+    assert result_hits["total"] == 3
+    assert result_hits["hits"][0]["message"] == "banner1"
+    assert result_hits["hits"][1]["message"] == "banner2"
+    assert result_hits["hits"][2]["message"] == "banner3"
+
+    # sort by bool(active)
+    query_string = {"sort": "active"}
+    banners_result = _search_banners(client, 200, query_string).json
+    result_hits = banners_result["hits"]
+    assert result_hits["total"] == 3
+    assert result_hits["hits"][0]["message"] == "banner2"
+    assert result_hits["hits"][1]["message"] == "banner1"
+    assert result_hits["hits"][2]["message"] == "banner3"
+
+    # sort by datetime(end_datetime)
+    query_string = {"sort": "end_datetime"}
+    banners_result = _search_banners(client, 200, query_string).json
+    result_hits = banners_result["hits"]
+    assert result_hits["total"] == 3
+    assert result_hits["hits"][0]["message"] == "banner2"
+    assert result_hits["hits"][1]["message"] == "banner1"
+    assert result_hits["hits"][2]["message"] == "banner3"
+
+    # sorting direction
+    # descending order
+    query_string = {"sort_direction": "desc"}
+    banners_result = _search_banners(client, 200, query_string).json
+    result_hits = banners_result["hits"]
+    assert result_hits["total"] == 3
+    assert result_hits["hits"][0]["message"] == "banner3"
+    assert result_hits["hits"][1]["message"] == "banner2"
+    assert result_hits["hits"][2]["message"] == "banner1"
+
+    # paginated search
+    query_string = {"size": "2"}
+    banners_result = _search_banners(client, 200, query_string).json
+    result_hits = banners_result["hits"]
+    assert len(result_hits) == 2
+    assert result_hits["total"] == 3
+    assert result_hits["hits"][0]["message"] == "banner1"
+    assert result_hits["hits"][1]["message"] == "banner2"
 
 
 def test_search_banner_empty_list(client, user):

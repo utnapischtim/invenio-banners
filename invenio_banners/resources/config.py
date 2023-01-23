@@ -15,6 +15,12 @@ from invenio_records_resources.resources import (
 )
 
 
+class BannerServerSearchRequestArgsSchema(SearchRequestArgsSchema):
+    """Banner request parameters."""
+
+    sort_direction = ma.fields.Str()
+
+
 class BannerResourceConfig(RecordResourceConfig):
     """Banner resource config."""
 
@@ -22,7 +28,6 @@ class BannerResourceConfig(RecordResourceConfig):
     blueprint_name = "banners"
     url_prefix = "/banners"
     routes = {
-        "create": "/new",
         "item": "/<banner_id>",
         "list": "/",
     }
@@ -36,7 +41,7 @@ class BannerResourceConfig(RecordResourceConfig):
         "url_path": ma.fields.String(),
     }
 
-    request_search_args = SearchRequestArgsSchema
+    request_search_args = BannerServerSearchRequestArgsSchema
 
     request_body_parsers = {"application/json": RequestBodyParser(JSONDeserializer())}
     default_content_type = "application/json"

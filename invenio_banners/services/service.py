@@ -7,8 +7,15 @@
 
 """Banner Service API."""
 
+import distutils.util
+
+import arrow
 from invenio_records_resources.services import RecordService
 from invenio_records_resources.services.base import LinksTemplate
+from invenio_records_resources.services.base.utils import map_search_params
+from sqlalchemy import func
+
+from ..records.models import BannerModel
 
 
 class BannerService(RecordService):
@@ -31,7 +38,13 @@ class BannerService(RecordService):
         """Retrieve the list of active banners with the given url_path."""
         self.require_permission(identity, "read")
 
-        banners = self.record_cls.get_active(url_path)
+        active_banners = self.record_cls.get_active()
+
+        # filter by url_path
+        banners = []
+        for banner in active_banners:
+            if banner.url_path is None or url_path.startswith(banner.url_path):
+                banners.append(banner)
 
         return self.result_list(
             self,
@@ -40,16 +53,49 @@ class BannerService(RecordService):
             links_item_tpl=self.links_item_tpl,
         )
 
-    def search(self, identity, limit=100, params=None):
+    def search(self, identity, params):
         """Search for banners matching the querystring."""
         self.require_permission(identity, "search")
 
-        banners = self.record_cls.search(limit, params)
+        search_params = map_search_params(self.config.search, params)
+
+        query_param = search_params["q"]
+        filters = []
+
+        if query_param:
+            filters.extend(
+                [
+                    BannerModel.url_path.ilike(f"%{query_param}%"),
+                    BannerModel.message.ilike(f"%{query_param}%"),
+                    BannerModel.category.ilike(f"%{query_param}%"),
+                ]
+            )
+            bool_value = self._validate_bool(query_param)
+            if bool_value is not None:
+                filters.extend(
+                    [
+                        BannerModel.active.is_(bool_value),
+                    ]
+                )
+
+            datetime_value = self._validate_datetime(query_param)
+            if datetime_value is not None:
+                filters.extend(
+                    [
+                        func.date(BannerModel.start_datetime) == datetime_value,
+                        func.date(BannerModel.end_datetime) == datetime_value,
+                        func.date(BannerModel.created) == datetime_value,
+                        func.date(BannerModel.updated) == datetime_value,
+                    ]
+                )
+
+        banners = self.record_cls.search(search_params, filters)
 
         return self.result_list(
             self,
             identity,
             banners,
+            params=search_params,
             links_tpl=LinksTemplate(self.config.links_search, context={"args": params}),
             links_item_tpl=self.links_item_tpl,
         )
@@ -101,3 +147,17 @@ class BannerService(RecordService):
         """Disable expired banners."""
         self.require_permission(identity, "disable")
         self.record_cls.disable_expired()
+
+    def _validate_bool(self, value):
+        try:
+            bool_value = distutils.util.strtobool(value)
+        except ValueError:
+            return None
+        return bool(bool_value)
+
+    def _validate_datetime(self, value):
+        try:
+            date_value = arrow.get(value).date()
+        except ValueError:
+            return None
+        return date_value
