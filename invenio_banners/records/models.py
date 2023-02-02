@@ -9,6 +9,7 @@
 
 from datetime import datetime
 
+import sqlalchemy as sa
 from flask import current_app
 from invenio_db import db
 from sqlalchemy import or_
@@ -89,7 +90,7 @@ class BannerModel(db.Model, Timestamp):
         db.session.commit()
 
     @classmethod
-    def get_active(cls):
+    def get_active(cls, url_path):
         """Return active banners."""
         now = datetime.utcnow()
 
@@ -99,7 +100,15 @@ class BannerModel(db.Model, Timestamp):
             .filter((cls.end_datetime.is_(None)) | (now <= cls.end_datetime))
         )
 
-        return query.all()
+        # filter by url_path
+        active_banners = query.filter(
+            sa.or_(
+                cls.url_path.is_(None),
+                sa.literal(url_path).startswith(cls.url_path),
+            )
+        )
+
+        return active_banners.all()
 
     @classmethod
     def search(cls, search_params, filters):

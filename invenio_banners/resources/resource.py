@@ -46,12 +46,14 @@ class BannerResource(ErrorHandlersMixin, Resource):
     @response_handler()
     def update(self):
         """Update a banner."""
-        banner_id = resource_requestctx.view_args["banner_id"]
         banner = self.service.update(
-            id=banner_id,
+            id=resource_requestctx.view_args["banner_id"],
             identity=g.identity,
             data=resource_requestctx.data,
         )
+
+        # disable expired banners
+        self.service.disable_expired(identity=g.identity)
 
         return banner.to_dict(), 200
 
@@ -86,6 +88,9 @@ class BannerResource(ErrorHandlersMixin, Resource):
             g.identity,
             resource_requestctx.data or {},
         )
+
+        # disable expired banners
+        self.service.disable_expired(identity=g.identity)
 
         return banner.to_dict(), 201
 

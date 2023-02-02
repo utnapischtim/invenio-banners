@@ -34,25 +34,6 @@ class BannerService(RecordService):
             links_tpl=self.links_item_tpl,
         )
 
-    def read_active_banners(self, identity, url_path):
-        """Retrieve the list of active banners with the given url_path."""
-        self.require_permission(identity, "read")
-
-        active_banners = self.record_cls.get_active()
-
-        # filter by url_path
-        banners = []
-        for banner in active_banners:
-            if banner.url_path is None or url_path.startswith(banner.url_path):
-                banners.append(banner)
-
-        return self.result_list(
-            self,
-            identity,
-            banners,
-            links_item_tpl=self.links_item_tpl,
-        )
-
     def search(self, identity, params):
         """Search for banners matching the querystring."""
         self.require_permission(identity, "search")
@@ -105,14 +86,14 @@ class BannerService(RecordService):
         self.require_permission(identity, "create")
 
         # validate data
-        data, errors = self.schema.load(
+        valid_data, errors = self.schema.load(
             data,
             context={"identity": identity},
             raise_errors=False,
         )
 
         # create the banner with the specified data
-        banner = self.record_cls.create(data)
+        banner = self.record_cls.create(valid_data)
 
         return self.result_item(
             self, identity, banner, links_tpl=self.links_item_tpl, errors=errors
@@ -134,7 +115,14 @@ class BannerService(RecordService):
 
         banner = self.record_cls.get(id)
 
-        self.record_cls.update(data, id)
+        # validate data
+        valid_data, errors = self.schema.load(
+            data,
+            context={"identity": identity},
+            raise_errors=True,
+        )
+
+        self.record_cls.update(valid_data, id)
 
         return self.result_item(
             self,

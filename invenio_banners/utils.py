@@ -7,6 +7,16 @@
 
 """Utils."""
 
+from flask import request
+
+from invenio_banners.services.config import BannerModel
+
+
+def get_active_banners_for_request():
+    """Get active banner for the current URL path request."""
+    url_path = request.path
+    return BannerModel.get_active(url_path)
+
 
 def style_category(category):
     """Return predefined Semantic-UI classes for each banner category."""

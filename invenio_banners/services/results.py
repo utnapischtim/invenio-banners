@@ -83,6 +83,21 @@ class BannerList(RecordList):
 
             yield projection
 
+    def to_dict(self):
+        """Return result as a dictionary."""
+        res = {
+            "hits": {
+                "hits": list(self.hits),
+                "total": self.total,
+            }
+        }
+
+        if self._params:
+            if self._links_tpl:
+                res["links"] = self._links_tpl.expand(self._identity, self.pagination)
+
+        return res
+
     @property
     def total(self):
         """Get total number of banners."""

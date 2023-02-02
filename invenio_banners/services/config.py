@@ -42,39 +42,23 @@ class SearchOptions:
         ),
     }
 
-    sort_default = "created"
+    sort_default = "start_datetime"
     sort_options = {
-        "message": dict(
-            title=_("Message"),
-            fields=["message"],
-        ),
         "url_path": dict(
             title=_("Url path"),
             fields=["url_path"],
         ),
-        "category": dict(
-            title=_("Category"),
-            fields=["category"],
+        "start_datetime": dict(
+            title=_("Start time"),
+            fields=["start_datetime"],
+        ),
+        "end_datetime": dict(
+            title=_("End time"),
+            fields=["end_datetime"],
         ),
         "active": dict(
             title=_("Active"),
             fields=["active"],
-        ),
-        "start_datetime": dict(
-            title=_("Start datetime"),
-            fields=["start_datetime"],
-        ),
-        "end_datetime": dict(
-            title=_("End datetime"),
-            fields=["end_datetime"],
-        ),
-        "created": dict(
-            title=_("Created"),
-            fields=["created"],
-        ),
-        "updated": dict(
-            title=_("Updated"),
-            fields=["updated"],
         ),
     }
     pagination_options = {

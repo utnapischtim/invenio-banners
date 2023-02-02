@@ -105,6 +105,21 @@ def test_create_banner(client, admin, headers):
     assert banner["active"] == banner_data["active"]
 
 
+def test_disable_expired_after_create_action(client, admin, headers):
+    """Disable expired banners after a create a banner action."""
+    # create banner first
+    banner1 = BannerModel.create(banners["banner1"])
+    assert banner1.active is True
+    banner_data = banners["banner2"]
+
+    admin.login(client)
+
+    _create_banner(client, banner_data, headers, 201).json
+
+    expired_banner = BannerModel.get(banner1.id)
+    assert expired_banner.active is False
+
+
 def test_update_banner(client, admin, headers):
     """Update a banner."""
     # create banner first
@@ -113,6 +128,8 @@ def test_update_banner(client, admin, headers):
     admin.login(client)
 
     new_data = {
+        "start_datetime": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+        "active": True,
         "message": "New banner message",
         "category": "info",
     }
@@ -123,6 +140,28 @@ def test_update_banner(client, admin, headers):
     assert updated_banner["category"] == new_data["category"]
     assert updated_banner["url_path"] == banner.url_path
     assert updated_banner["active"] == banner.active
+
+
+def test_disable_expired_after_update_action(client, admin, headers):
+    """Disable expired banners after an update a banner action."""
+    # create banner first
+    banner1 = BannerModel.create(banners["banner1"])
+    banner2 = BannerModel.create(banners["banner2"])
+    assert banner1.active is True
+
+    admin.login(client)
+
+    new_data = {
+        "start_datetime": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+        "active": True,
+        "message": "New banner message",
+        "category": "info",
+    }
+
+    _update_banner(client, banner2.id, new_data, headers, 200).json
+
+    expired_banner = BannerModel.get(banner1.id)
+    assert expired_banner.active is False
 
 
 def test_update_is_forbidden(client, user, headers):
