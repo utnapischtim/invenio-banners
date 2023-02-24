@@ -7,7 +7,7 @@
 
 """Invenio administration banners view module."""
 
-from flask_babelex import lazy_gettext as _
+from invenio_i18n import lazy_gettext as _
 from invenio_administration.views.base import (
     AdminResourceCreateView,
     AdminResourceDetailView,
