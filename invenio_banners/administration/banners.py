@@ -7,13 +7,13 @@
 
 """Invenio administration banners view module."""
 
-from invenio_i18n import lazy_gettext as _
 from invenio_administration.views.base import (
     AdminResourceCreateView,
     AdminResourceDetailView,
     AdminResourceEditView,
     AdminResourceListView,
 )
+from invenio_i18n import lazy_gettext as _
 
 
 class BannerListView(AdminResourceListView):
