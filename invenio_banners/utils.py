@@ -20,7 +20,7 @@ def get_active_banners_for_request():
 
 def style_category(category):
     """Return predefined Semantic-UI classes for each banner category."""
-    style_class = "ui {} flashed top attached manage mb-0 message"
+    style_class = "ui {} flashed top attached manage m-0 message"
     if category == "warning":
         style_class = style_class.format("warning")
     elif category == "other":

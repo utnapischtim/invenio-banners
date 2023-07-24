@@ -51,7 +51,7 @@ def test_jinja_macro(app, db):
     # add one banner
     EXPECTED_MSG = "Test banner info message"
     EXPECTED_CATEGORY = "info"
-    EXPECTED_STYLE = "ui info flashed top attached manage mb-0 message"
+    EXPECTED_STYLE = "ui info flashed top attached manage m-0 message"
     banner = _create_banner(EXPECTED_MSG, EXPECTED_CATEGORY)
     style = style_category(banner.category)
 
@@ -63,7 +63,7 @@ def test_jinja_macro(app, db):
     # change message and category
     EXPECTED_MSG = "Test banner warning message"
     EXPECTED_CATEGORY = "warning"
-    EXPECTED_STYLE = "ui warning flashed top attached manage mb-0 message"
+    EXPECTED_STYLE = "ui warning flashed top attached manage m-0 message"
 
     banner.message = EXPECTED_MSG
     banner.category = EXPECTED_CATEGORY
