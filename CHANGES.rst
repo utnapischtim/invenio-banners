@@ -7,6 +7,10 @@
 Changes
 =======
 
+Version 2.1.1 (released 2023-07-24)
+
+- ui: remove bottom margin
+
 Version 2.1.0 (released 2023-03-02)
 
 - remove deprecated flask-babelex imports
