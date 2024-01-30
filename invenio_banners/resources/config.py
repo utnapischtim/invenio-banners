@@ -45,3 +45,10 @@ class BannerResourceConfig(RecordResourceConfig):
 
     request_body_parsers = {"application/json": RequestBodyParser(JSONDeserializer())}
     default_content_type = "application/json"
+
+    response_handlers = {
+        "application/vnd.inveniordm.v1+json": RecordResourceConfig.response_handlers[
+            "application/json"
+        ],
+        **RecordResourceConfig.response_handlers,
+    }
