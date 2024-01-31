@@ -29,4 +29,6 @@ recursive-include docs *.txt
 recursive-include docs Makefile
 recursive-include invenio_banners *.html
 recursive-include invenio_banners *.py
+recursive-include invenio_banners *.po
+recursive-include invenio_banners *.pot
 recursive-include tests *.py
