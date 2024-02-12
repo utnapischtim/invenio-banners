@@ -24,7 +24,7 @@ class BannerListView(AdminResourceListView):
     resource_config = "banners_resource"
     title = "Banners"
     menu_label = "Banners"
-    category = "Banners"
+    category = _("Site management")
     pid_path = "id"
     icon = "newspaper"
 
