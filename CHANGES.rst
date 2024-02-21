@@ -7,6 +7,10 @@
 Changes
 =======
 
+Version 3.0.1 (released 2024-02-21)
+
+- Moved admin menu item for banners to site administration category
+
 Version 3.0.0 (released 2024-01-31)
 
 - installation: bump invenio-administration
