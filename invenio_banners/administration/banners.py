@@ -117,6 +117,7 @@ class BannerEditView(AdminResourceEditView):
                 {"title_l10n": "Warning", "id": "warning"},
                 {"title_l10n": "Other", "id": "other"},
             ],
+            "placeholder": "Select a category",
         },
         "active": {
             "order": 6,
@@ -200,7 +201,7 @@ class BannerCreateView(AdminResourceCreateView):
                 {"title_l10n": "Warning", "id": "warning"},
                 {"title_l10n": "Other", "id": "other"},
             ],
-            "placeholder": "Info",
+            "placeholder": "Select a category",
         },
         "active": {
             "order": 6,

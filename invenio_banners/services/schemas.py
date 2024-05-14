@@ -19,7 +19,7 @@ class BannerSchema(BaseRecordSchema):
 
     message = fields.String(required=True)
     url_path = fields.String(allow_none=True)
-    category = fields.String(required=True)
+    category = fields.String(required=True, metadata={"default": "info"})
     start_datetime = fields.DateTime(
         required=True,
         metadata={"default": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")},
