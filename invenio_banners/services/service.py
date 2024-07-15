@@ -89,7 +89,7 @@ class BannerService(RecordService):
         valid_data, errors = self.schema.load(
             data,
             context={"identity": identity},
-            raise_errors=False,
+            raise_errors=raise_errors,
         )
 
         # create the banner with the specified data
