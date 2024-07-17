@@ -7,6 +7,10 @@
 Changes
 =======
 
+Version 3.0.2 (released 2024-07-17)
+
+- errors: implement REST validation error for banner loader
+
 Version 3.0.1 (released 2024-02-21)
 
 - Moved admin menu item for banners to site administration category
