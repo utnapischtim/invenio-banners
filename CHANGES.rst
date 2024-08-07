@@ -7,6 +7,10 @@
 Changes
 =======
 
+Version v3.1.0 (released 2024-08-07)
+
+- http headers: use and adjust vnd.inveniordm.v1+json http accept header
+
 Version 3.0.2 (released 2024-07-17)
 
 - errors: implement REST validation error for banner loader
