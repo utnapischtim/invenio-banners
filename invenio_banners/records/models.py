@@ -24,7 +24,6 @@ class BannerModel(db.Model, Timestamp):
     """Defines a message to show to users."""
 
     __tablename__ = "banners"
-    __versioned__ = {"versioning": False}
 
     id = db.Column(db.Integer, primary_key=True)
 
