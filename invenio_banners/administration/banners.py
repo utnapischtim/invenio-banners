@@ -49,6 +49,76 @@ class BannerListView(AdminResourceListView):
     search_sort_config_name = "BANNERS_SORT_OPTIONS"
 
 
+common_form_fields = {
+    "start_datetime": {
+        "order": 1,
+        "text": _("Start time"),
+        "description": _(
+            "Date/time to make the banner active. "
+            "Input format: yyyy-mm-dd hh:mm:ss. "
+            "Set to future date/time to delay the banner. "
+            "Note: specify time in UTC time standard."
+        ),
+        "placeholder": _("YYYY-MM-DD hh:mm:ss"),
+    },
+    "end_datetime": {
+        "order": 2,
+        "text": _("End time"),
+        "description": _(
+            "Date/time to make the banner inactive. "
+            "Input format: yyyy-mm-dd hh:mm:ss.  An empty value makes "
+            "the banner active until manually disabled via the active flag. "
+            "Note: specify time in UTC time standard."
+        ),
+        "placeholder": _("YYYY-MM-DD hh:mm:ss"),
+    },
+    "message": {
+        "order": 3,
+        "text": _("Message"),
+        "description": _(
+            "Message to be displayed on the banner. HTML format is supported."
+        ),
+        "rows": 10,
+    },
+    "url_path": {
+        "order": 4,
+        "text": _("URL path"),
+        "description": _(
+            "URL path prefix (including the first /) to define where "
+            "the message will be active on the site. For "
+            "example, if you enter `/records`, any URL starting with "
+            "`/records` will return an active banner (`/records`, "
+            "`/records/1234`, etc.). An empty value makes the banner "
+            "active for any URL."
+        ),
+    },
+    "category": {
+        "order": 5,
+        "text": _("Category"),
+        "description": _(
+            "Banner category. `Info` option displays a blue banner. "
+            "`Warning` option displays an orange banner. "
+            "`Other` option displays a gray banner."
+        ),
+        "options": [
+            {"title_l10n": "Info", "id": "info"},
+            {"title_l10n": "Warning", "id": "warning"},
+            {"title_l10n": "Other", "id": "other"},
+        ],
+        "placeholder": "Select a category",
+    },
+    "active": {
+        "order": 6,
+        "text": _("Active"),
+        "description": _(
+            "Tick it to activate the banner: banner will be "
+            "displayed according to start/end times. If not "
+            "activated, start/end times will be ignored."
+        ),
+    },
+}
+
+
 class BannerEditView(AdminResourceEditView):
     """Configuration for Banner edit view."""
 
@@ -62,72 +132,7 @@ class BannerEditView(AdminResourceEditView):
     list_view_name = "banners"
 
     form_fields = {
-        "start_datetime": {
-            "order": 1,
-            "text": _("Start time"),
-            "description": _(
-                "Input format: yyyy-mm-dd hh:mm:ss. "
-                "Set to current or future date/time to delay the banner. "
-                "Note: specify time in UTC time standard."
-            ),
-            "placeholder": _("YYYY-MM-DD hh:mm:ss"),
-        },
-        "end_datetime": {
-            "order": 2,
-            "text": _("End time"),
-            "description": _(
-                "Input format: yyyy-mm-dd hh:mm:ss. Date/time "
-                "to make the banner inactive. Empty value will make "
-                "the banner active until manually disabled via the active flag. "
-                "Note: specify time in UTC time standard."
-            ),
-            "placeholder": _("YYYY-MM-DD hh:mm:ss"),
-        },
-        "message": {
-            "order": 3,
-            "text": _("Message"),
-            "description": _(
-                "Message to be displayed on the banner. HTML format is supported."
-            ),
-            "rows": 10,
-        },
-        "url_path": {
-            "order": 4,
-            "text": _("URL path"),
-            "description": _(
-                "Enter the URL path (including the first /) to define in "
-                "which part of the site the message will be active. For "
-                "example, if you enter `/records`, any URL starting with "
-                "`/records` will return an active banner (/records, "
-                "/records/1234, etc...). Empty value will make the banner "
-                "active for any URL."
-            ),
-        },
-        "category": {
-            "order": 5,
-            "text": _("Category"),
-            "description": _(
-                "Banner category. Info option displays the banner "
-                "with information message in a blue color. "
-                "Warning - a warning information in an orange color. "
-                "Other - all the rest types of massages in a gray color."
-            ),
-            "options": [
-                {"title_l10n": "Info", "id": "info"},
-                {"title_l10n": "Warning", "id": "warning"},
-                {"title_l10n": "Other", "id": "other"},
-            ],
-            "placeholder": "Select a category",
-        },
-        "active": {
-            "order": 6,
-            "text": _("Active"),
-            "description": _(
-                "Tick it to activate the banner: banner will be"
-                "displayed according to start/end times. If not "
-                "activated, start/end times will be ignored."
-            ),
-        },
+        **common_form_fields,
         "created": {"order": 7},
         "updated": {"order": 8},
     }
@@ -146,72 +151,7 @@ class BannerCreateView(AdminResourceCreateView):
     list_view_name = "banners"
 
     form_fields = {
-        "start_datetime": {
-            "order": 1,
-            "text": _("Start time"),
-            "description": _(
-                "Input format: yyyy-mm-dd hh:mm:ss. "
-                "Set to current or future date/time to delay the banner. "
-                "Note: specify time in UTC time standard."
-            ),
-            "placeholder": _("YYYY-MM-DD hh:mm:ss"),
-        },
-        "end_datetime": {
-            "order": 2,
-            "text": _("End time"),
-            "description": _(
-                "Input format: yyyy-mm-dd hh:mm:ss. Date/time "
-                "to make the banner inactive. Empty value will make "
-                "the banner active until manually disabled via the active flag. "
-                "Note: specify time in UTC time standard."
-            ),
-            "placeholder": _("YYYY-MM-DD hh:mm:ss"),
-        },
-        "message": {
-            "order": 3,
-            "text": _("Message"),
-            "description": _(
-                "Message to be displayed on the banner. HTML format is supported."
-            ),
-            "rows": 10,
-        },
-        "url_path": {
-            "order": 4,
-            "text": _("URL path"),
-            "description": _(
-                "Enter the URL path (including the first /) to define in "
-                "which part of the site the message will be active. For "
-                "example, if you enter `/records`, any URL starting with "
-                "`/records` will return an active banner (/records, "
-                "/records/1234, etc...). Empty value will make the banner "
-                "active for any URL."
-            ),
-        },
-        "category": {
-            "order": 5,
-            "text": _("Category"),
-            "description": _(
-                "Banner category. Info option displays the banner "
-                "with information message in a blue color. "
-                "Warning - a warning information in an orange color. "
-                "Other - all the rest types of messages in a gray color."
-            ),
-            "options": [
-                {"title_l10n": "Info", "id": "info"},
-                {"title_l10n": "Warning", "id": "warning"},
-                {"title_l10n": "Other", "id": "other"},
-            ],
-            "placeholder": "Select a category",
-        },
-        "active": {
-            "order": 6,
-            "text": _("Active"),
-            "description": _(
-                "Tick it to activate the banner: banner will be"
-                "displayed according to start/end times. If not "
-                "activated, start/end times will be ignored."
-            ),
-        },
+        **common_form_fields,
     }
 
 
