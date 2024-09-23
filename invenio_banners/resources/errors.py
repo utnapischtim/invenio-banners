@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 #
 # Copyright (C) 2023 CERN.
+# Copyright (C) 2024 Graz University of Technology.
 #
 # Invenio-Banners is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
 """Errors."""
 
-from flask_resources import HTTPJSONException, create_error_handler
-
-from ..services.errors import BannerNotExistsError
 import marshmallow as ma
 from flask_resources import HTTPJSONException, create_error_handler
 from invenio_records_resources.errors import validation_error_to_list_errors
+
+from ..services.errors import BannerNotExistsError
 
 
 class HTTPJSONValidationException(HTTPJSONException):
@@ -25,7 +25,7 @@ class HTTPJSONValidationException(HTTPJSONException):
         super().__init__(code=400, errors=validation_error_to_list_errors(exception))
 
 
-class ErrorHandlersMixin():
+class ErrorHandlersMixin:
     """Mixin to define error handlers."""
 
     error_handlers = {
