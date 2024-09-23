@@ -1,13 +1,21 @@
 # -*- coding: utf-8 -*-
 #
 # Copyright (C) 2022-2023 CERN.
+# Copyright (C) 2024 Graz University of Technology.
 #
 # Invenio-Banners is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
 """Service results."""
-from flask_sqlalchemy import Pagination
+
 from invenio_records_resources.services.records.results import RecordItem, RecordList
+
+try:
+    # flask_sqlalchemy<3.0.0
+    from flask_sqlalchemy import Pagination
+except ImportError:
+    # flask_sqlalchemy>=3.0.0
+    from flask_sqlalchemy.pagination import Pagination
 
 
 class BannerItem(RecordItem):
