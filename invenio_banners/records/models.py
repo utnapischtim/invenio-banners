@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # Copyright (C) 2020-2023 CERN.
+# Copyright (C) 2024 Graz University of Technology.
 #
 # Invenio-Banners is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -113,7 +114,7 @@ class BannerModel(db.Model, Timestamp):
     def search(cls, search_params, filters):
         """Filter banners accordingly to query params."""
         banners = (
-            BannerModel.query.filter(or_(*filters))
+            BannerModel.query.filter(or_(False, *filters))
             .order_by(
                 search_params["sort_direction"](text(",".join(search_params["sort"])))
             )
