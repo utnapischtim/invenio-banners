@@ -51,6 +51,7 @@ class BannerModel(db.Model, Timestamp):
         """Create a new banner."""
         _categories = [t[0] for t in current_app.config["BANNERS_CATEGORIES"]]
         assert data.get("category") in _categories
+
         with db.session.begin_nested():
             obj = cls(
                 message=data.get("message"),
@@ -62,7 +63,6 @@ class BannerModel(db.Model, Timestamp):
             )
             db.session.add(obj)
 
-        db.session.commit()
         return obj
 
     @classmethod
@@ -86,8 +86,6 @@ class BannerModel(db.Model, Timestamp):
         """Delete banner by its id."""
         with db.session.begin_nested():
             db.session.delete(banner)
-
-        db.session.commit()
 
     @classmethod
     def get_active(cls, url_path):
