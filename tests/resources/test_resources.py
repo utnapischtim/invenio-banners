@@ -60,36 +60,28 @@ banners = {
 
 def _create_banner(client, data, headers, status_code=None):
     """Send POST request."""
-    result = client.post(
-        "/banners/",
-        headers=headers,
-        json=data,
-    )
+    result = client.post("/banners/", headers=headers, json=data)
     assert result.status_code == status_code
     return result
 
 
 def _update_banner(client, id, data, headers, status_code=None):
     """Send PUT request."""
-    result = client.put(
-        "/banners/{0}".format(id),
-        headers=headers,
-        json=data,
-    )
+    result = client.put(f"/banners/{id}", headers=headers, json=data)
     assert result.status_code == status_code
     return result
 
 
 def _delete_banner(client, id, headers, status_code=None):
     """Send DELETE request."""
-    result = client.delete("/banners/{0}".format(id), headers=headers)
+    result = client.delete(f"/banners/{id}", headers=headers)
     assert result.status_code == status_code
     return result
 
 
 def _get_banner(client, id, status_code=None):
     """Send GET request."""
-    result = client.get("/banners/{0}".format(id))
+    result = client.get(f"/banners/{id}")
     assert result.status_code == status_code
     return result
 
