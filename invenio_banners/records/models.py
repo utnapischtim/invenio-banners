@@ -69,7 +69,7 @@ class BannerModel(db.Model, Timestamp):
     def update(cls, data, id):
         """Update an existing banner."""
         with db.session.begin_nested():
-            cls.query.filter_by(id=id).update(data)
+            db.session.query(cls).filter_by(id=id).update(data)
 
         db.session.commit()
 
@@ -77,7 +77,7 @@ class BannerModel(db.Model, Timestamp):
     def get(cls, id):
         """Get banner by its id."""
         try:
-            return cls.query.filter_by(id=id).one()
+            return db.session.query(cls).filter_by(id=id).one()
         except NoResultFound:
             raise BannerNotExistsError(id)
 
@@ -93,7 +93,8 @@ class BannerModel(db.Model, Timestamp):
         now = datetime.utcnow()
 
         query = (
-            cls.query.filter(cls.active.is_(True))
+            db.session.query(cls)
+            .filter(cls.active.is_(True))
             .filter(cls.start_datetime <= now)
             .filter((cls.end_datetime.is_(None)) | (now <= cls.end_datetime))
         )
@@ -111,16 +112,17 @@ class BannerModel(db.Model, Timestamp):
     @classmethod
     def search(cls, search_params, filters):
         """Filter banners accordingly to query params."""
-        banners = (
-            BannerModel.query.filter(or_(False, *filters))
-            .order_by(
-                search_params["sort_direction"](text(",".join(search_params["sort"])))
-            )
-            .paginate(
-                page=search_params["page"],
-                per_page=search_params["size"],
-                error_out=False,
-            )
+        if filters == []:
+            filtered = db.session.query(BannerModel).filter()
+        else:
+            filtered = db.session.query(BannerModel).filter(or_(*filters))
+
+        banners = filtered.order_by(
+            search_params["sort_direction"](text(",".join(search_params["sort"])))
+        ).paginate(
+            page=search_params["page"],
+            per_page=search_params["size"],
+            error_out=False,
         )
 
         return banners
@@ -131,7 +133,8 @@ class BannerModel(db.Model, Timestamp):
         now = datetime.utcnow()
 
         query = (
-            cls.query.filter(cls.active.is_(True))
+            db.session.query(cls)
+            .filter(cls.active.is_(True))
             .filter(cls.end_datetime.isnot(None))
             .filter(cls.end_datetime < now)
         )

@@ -10,6 +10,7 @@
 from datetime import date, datetime, timedelta
 
 import pytest
+from invenio_db import db
 from invenio_records_resources.services.errors import PermissionDeniedError
 
 from invenio_banners.records import BannerModel
@@ -209,7 +210,7 @@ def test_delete_banner(client, admin, headers):
     _delete_banner(client, banner.id, headers, 204)
 
     # check that it's not present in db
-    assert BannerModel.query.filter_by(id=banner.id).one_or_none() is None
+    assert db.session.query(BannerModel).filter_by(id=banner.id).one_or_none() is None
 
 
 def test_delete_is_forbidden(client, user, headers):

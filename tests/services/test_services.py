@@ -10,6 +10,7 @@
 from datetime import datetime, timedelta
 
 import pytest
+from invenio_db import db
 from invenio_records_resources.services.errors import PermissionDeniedError
 
 from invenio_banners.proxies import current_banners_service as service
@@ -127,7 +128,7 @@ def test_delete_banner(app, superuser_identity):
     service.delete(superuser_identity, banner.id)
 
     # check that it's not present in db
-    assert BannerModel.query.filter_by(id=banner.id).one_or_none() is None
+    assert db.session.query(BannerModel).filter_by(id=banner.id).one_or_none() is None
 
 
 def test_delete_is_forbidden(app, simple_user_identity):
@@ -207,11 +208,12 @@ def test_disable_expired_banners(app, superuser_identity):
     BannerModel.create(banners["expired"])
     BannerModel.create(banners["active"])
 
-    assert BannerModel.query.filter(BannerModel.active.is_(True)).count() == 2
-
+    assert (
+        db.session.query(BannerModel).filter(BannerModel.active.is_(True)).count() == 2
+    )
     service.disable_expired(superuser_identity)
 
-    _banners = BannerModel.query.filter(BannerModel.active.is_(True)).all()
+    _banners = db.session.query(BannerModel).filter(BannerModel.active.is_(True)).all()
 
     assert len(_banners) == 1
     assert _banners[0].message == "active"
