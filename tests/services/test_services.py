@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # Copyright (C) 2022 CERN.
+# Copyright (C) 2024 Graz University of Technology.
 #
 # Invenio-Banners is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -22,7 +23,10 @@ banners = {
         "message": "active",
         "url_path": "/active",
         "category": "info",
-        "end_datetime": datetime.utcnow() + timedelta(days=1),
+        "start_datetime": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+        "end_datetime": (datetime.utcnow() + timedelta(days=1)).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        ),
         "active": True,
     },
     "inactive": {
@@ -151,7 +155,7 @@ def test_delete_non_existing_banner(app, superuser_identity):
 def test_read_banner(app, simple_user_identity):
     """Read a banner by id."""
     # create banner first
-    banner = BannerModel.create(banners["active"])
+    banner = BannerModel.create(banners["other"])
 
     banner_result = service.read(simple_user_identity, banner.id)
 
