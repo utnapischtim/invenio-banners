@@ -56,6 +56,14 @@ banners = {
             "%Y-%m-%d %H:%M:%S"
         ),
     },
+    "html_banner": {
+        "message": '<h1>HTML aware banner.</h1>.\n \'<p class="test">paragraph<br /></p><script '
+        "type=\"text/javascript\">alert('You won!')</script>",
+        "url_path": "/html_banner",
+        "category": "warning",
+        "active": True,
+        "start_datetime": datetime(2022, 7, 20, 20, 0, 0).strftime("%Y-%m-%d %H:%M:%S"),
+    },
 }
 
 
@@ -376,3 +384,14 @@ def test_search_banner_empty_list(client, user):
     result = banners["hits"]
     assert len(result["hits"]) == 0
     assert result["total"] == 0
+
+
+def test_html_banner(client, admin, headers):
+    banner_data = banners["html_banner"]
+    admin.login(client)
+
+    banner = _create_banner(client, banner_data, headers, 201).json
+    assert (
+        banner["message"]
+        == "<h1>HTML aware banner.</h1>.\n '<p>paragraph<br></p>alert('You won!')"
+    )
