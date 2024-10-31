@@ -73,8 +73,6 @@ class BannerModel(db.Model, Timestamp):
             # returned and this classmethod would be called
             db.session.query(cls).filter_by(id=id).update(data)
 
-        db.session.commit()
-
     @classmethod
     def get(cls, id):
         """Get banner by its id."""
@@ -143,5 +141,3 @@ class BannerModel(db.Model, Timestamp):
 
         for old in query.all():
             old.active = False
-
-        db.session.commit()
