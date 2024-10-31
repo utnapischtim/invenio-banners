@@ -14,7 +14,6 @@ import sqlalchemy as sa
 from flask import current_app
 from invenio_db import db
 from sqlalchemy import or_
-from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql import text
 from sqlalchemy_utils.models import Timestamp
 
@@ -69,6 +68,9 @@ class BannerModel(db.Model, Timestamp):
     def update(cls, data, id):
         """Update an existing banner."""
         with db.session.begin_nested():
+            # NOTE:
+            # with db.session.get(cls, id) the model itself would be
+            # returned and this classmethod would be called
             db.session.query(cls).filter_by(id=id).update(data)
 
         db.session.commit()
@@ -76,10 +78,10 @@ class BannerModel(db.Model, Timestamp):
     @classmethod
     def get(cls, id):
         """Get banner by its id."""
-        try:
-            return db.session.query(cls).filter_by(id=id).one()
-        except NoResultFound:
-            raise BannerNotExistsError(id)
+        if banner := db.session.get(cls, id):
+            return banner
+
+        raise BannerNotExistsError(id)
 
     @classmethod
     def delete(cls, banner):
