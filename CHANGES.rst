@@ -7,6 +7,12 @@
 Changes
 =======
 
+Version v3.2.0 (released 2024-11-05)
+
+- feat(administration): use html editor for message
+- global: change the code to be compatible with sqlalchemy >= 2.0
+- global: add compatibility layer to move to flask >= 3.0
+
 Version v3.1.0 (released 2024-08-07)
 
 - http headers: use and adjust vnd.inveniordm.v1+json http accept header
