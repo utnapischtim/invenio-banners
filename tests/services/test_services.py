@@ -11,25 +11,20 @@
 from datetime import datetime, timedelta, timezone
 
 import pytest
-from invenio_db import db
+from invenio_db import db, now
 from invenio_records_resources.services.errors import PermissionDeniedError
 
 from invenio_banners.proxies import current_banners_service as service
 from invenio_banners.records import BannerModel
 from invenio_banners.services.errors import BannerNotExistsError
 
-
-def _now():
-    return datetime.now(timezone.utc).replace(tzinfo=None)
-
-
 banners = {
     "active": {
         "message": "active",
         "url_path": "/active",
         "category": "info",
-        "start_datetime": _now().strftime("%Y-%m-%d %H:%M:%S"),
-        "end_datetime": (_now() + timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S"),
+        "start_datetime": now().strftime("%Y-%m-%d %H:%M:%S"),
+        "end_datetime": (now() + timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S"),
         "active": True,
     },
     "inactive": {
@@ -42,28 +37,28 @@ banners = {
         "message": "other",
         "url_path": "/other",
         "category": "warning",
-        "end_datetime": _now() + timedelta(days=5),
+        "end_datetime": now() + timedelta(days=5),
         "active": True,
     },
     "expired": {
         "message": "expired",
         "url_path": "/expired",
         "category": "info",
-        "end_datetime": _now() - timedelta(days=1),
+        "end_datetime": now() - timedelta(days=1),
         "active": True,
     },
     "sub_records_only": {
         "message": "sub_records_only",
         "url_path": "/resources/sub",
         "category": "warning",
-        "start_datetime": _now() - timedelta(days=1),
+        "start_datetime": now() - timedelta(days=1),
         "active": True,
     },
     "records_only": {
         "message": "records_only",
         "url_path": "/resources",
         "category": "info",
-        "start_datetime": _now() - timedelta(days=1),
+        "start_datetime": now() - timedelta(days=1),
         "active": True,
     },
 }
@@ -93,7 +88,7 @@ def test_update_banner(app, superuser_identity):
 
     new_data = {
         "active": True,
-        "start_datetime": _now().strftime("%Y-%m-%d %H:%M:%S"),
+        "start_datetime": now().strftime("%Y-%m-%d %H:%M:%S"),
         "message": "New banner message",
         "category": "info",
     }

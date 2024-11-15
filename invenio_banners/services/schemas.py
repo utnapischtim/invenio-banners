@@ -8,8 +8,9 @@
 
 """Banners schema."""
 
-from datetime import datetime, timezone
+from datetime import timezone
 
+from invenio_db import now
 from invenio_records_resources.services.records.schema import BaseRecordSchema
 from marshmallow import fields, pre_load
 from marshmallow_utils.fields import TZDateTime
@@ -23,11 +24,7 @@ class BannerSchema(BaseRecordSchema):
     category = fields.String(required=True, metadata={"default": "info"})
     start_datetime = fields.DateTime(
         required=True,
-        metadata={
-            "default": datetime.now(timezone.utc)
-            .replace(tzinfo=None)
-            .strftime("%Y-%m-%d %H:%M:%S")
-        },
+        metadata={"default": now().strftime("%Y-%m-%d %H:%M:%S")},
     )
     end_datetime = fields.DateTime(allow_none=True)
     active = fields.Boolean(required=True, metadata={"default": True})

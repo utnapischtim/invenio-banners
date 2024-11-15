@@ -8,10 +8,8 @@
 
 """Test views."""
 
-from datetime import datetime, timezone
 
-import pytest
-from flask import url_for
+from invenio_db import now
 
 from invenio_banners.records.models import BannerModel
 from invenio_banners.utils import style_category
@@ -24,7 +22,7 @@ def _create_banner(message, category, url_path=None):
             "message": message,
             "category": category,
             "url_path": url_path,
-            "start_datetime": datetime.now(timezone.utc).replace(tzinfo=None),
+            "start_datetime": now(),
             "active": True,
         }
     )

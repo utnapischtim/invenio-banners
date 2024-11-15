@@ -8,11 +8,9 @@
 
 """Models."""
 
-from datetime import datetime, timezone
-
 import sqlalchemy as sa
 from flask import current_app
-from invenio_db import db
+from invenio_db import db, now
 from sqlalchemy import or_
 from sqlalchemy.sql import text
 from sqlalchemy_utils.models import Timestamp
@@ -36,11 +34,7 @@ class BannerModel(db.Model, Timestamp):
     category = db.Column(db.String(20), nullable=False)
     """Category of the message, for styling messages per category."""
 
-    start_datetime = db.Column(
-        db.DateTime,
-        nullable=False,
-        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
-    )
+    start_datetime = db.Column(db.DateTime, nullable=False, default=lambda: now())
     """Start date and time (UTC), can be immediate or delayed."""
 
     end_datetime = db.Column(db.DateTime, nullable=True)
@@ -94,13 +88,13 @@ class BannerModel(db.Model, Timestamp):
     @classmethod
     def get_active(cls, url_path):
         """Return active banners."""
-        now = datetime.now(timezone.utc).replace(tzinfo=None)
+        _now = now()
 
         query = (
             db.session.query(cls)
             .filter(cls.active.is_(True))
-            .filter(cls.start_datetime <= now)
-            .filter((cls.end_datetime.is_(None)) | (now <= cls.end_datetime))
+            .filter(cls.start_datetime <= _now)
+            .filter((cls.end_datetime.is_(None)) | (now() <= cls.end_datetime))
         )
 
         # filter by url_path
@@ -134,13 +128,11 @@ class BannerModel(db.Model, Timestamp):
     @classmethod
     def disable_expired(cls):
         """Disable any old still active messages to keep everything clean."""
-        now = datetime.now(timezone.utc).replace(tzinfo=None)
-
         query = (
             db.session.query(cls)
             .filter(cls.active.is_(True))
             .filter(cls.end_datetime.isnot(None))
-            .filter(cls.end_datetime < now)
+            .filter(cls.end_datetime < now())
         )
 
         for old in query.all():
