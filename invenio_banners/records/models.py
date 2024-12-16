@@ -15,28 +15,9 @@ from flask import current_app
 from invenio_db import db
 from sqlalchemy import or_
 from sqlalchemy.sql import text
-from sqlalchemy.types import DateTime, TypeDecorator
 from sqlalchemy_utils.models import Timestamp
 
 from ..services.errors import BannerNotExistsError
-
-
-class UTCDateTime(TypeDecorator):
-    """Custom UTC datetime type."""
-
-    impl = DateTime
-
-    def process_bind_param(self, value, dialect):
-        """Process value storing into database."""
-        if isinstance(value, datetime):
-            return value.replace(tzinfo=None)
-        return value
-
-    def process_result_value(self, value, dialect):
-        """Process value retrieving from database."""
-        if isinstance(value, datetime):
-            return value.replace(tzinfo=None)
-        return value
 
 
 class BannerModel(db.Model, Timestamp):
@@ -56,11 +37,11 @@ class BannerModel(db.Model, Timestamp):
     """Category of the message, for styling messages per category."""
 
     start_datetime = db.Column(
-        UTCDateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
+        db.UTCDateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
     )
     """Start date and time (UTC), can be immediate or delayed."""
 
-    end_datetime = db.Column(UTCDateTime, nullable=True)
+    end_datetime = db.Column(db.UTCDateTime, nullable=True)
     """End date and time (UTC), must be after `start` or forever if null."""
 
     active = db.Column(db.Boolean(name="active"), nullable=False, default=True)
