@@ -8,7 +8,7 @@
 
 """Service level tests for Banners."""
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import pytest
 from invenio_db import db
@@ -23,8 +23,8 @@ banners = {
         "message": "active",
         "url_path": "/active",
         "category": "info",
-        "start_datetime": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
-        "end_datetime": (datetime.utcnow() + timedelta(days=1)).strftime(
+        "start_datetime": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
+        "end_datetime": (datetime.now(timezone.utc) + timedelta(days=1)).strftime(
             "%Y-%m-%d %H:%M:%S"
         ),
         "active": True,
@@ -39,28 +39,28 @@ banners = {
         "message": "other",
         "url_path": "/other",
         "category": "warning",
-        "end_datetime": datetime.utcnow() + timedelta(days=5),
+        "end_datetime": datetime.now(timezone.utc) + timedelta(days=5),
         "active": True,
     },
     "expired": {
         "message": "expired",
         "url_path": "/expired",
         "category": "info",
-        "end_datetime": datetime.utcnow() - timedelta(days=1),
+        "end_datetime": datetime.now(timezone.utc) - timedelta(days=1),
         "active": True,
     },
     "sub_records_only": {
         "message": "sub_records_only",
         "url_path": "/resources/sub",
         "category": "warning",
-        "start_datetime": datetime.utcnow() - timedelta(days=1),
+        "start_datetime": datetime.now(timezone.utc) - timedelta(days=1),
         "active": True,
     },
     "records_only": {
         "message": "records_only",
         "url_path": "/resources",
         "category": "info",
-        "start_datetime": datetime.utcnow() - timedelta(days=1),
+        "start_datetime": datetime.now(timezone.utc) - timedelta(days=1),
         "active": True,
     },
 }
@@ -90,7 +90,7 @@ def test_update_banner(app, superuser_identity):
 
     new_data = {
         "active": True,
-        "start_datetime": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+        "start_datetime": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
         "message": "New banner message",
         "category": "info",
     }
